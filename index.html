@@ -1,0 +1,2213 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0D0D0D">
+<title>Herencia Bajo la Lupa — Sistema GENCODE</title>
+
+<!-- PWA Manifest -->
+<link rel="manifest" href="manifest.json">
+
+<!-- iOS / Safari PWA icons -->
+<link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.png">
+<link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" sizes="512x512" href="icons/icon-512.png">
+<meta name="apple-mobile-web-app-title" content="GENCODE">
+
+<!-- Android splash -->
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
+
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:#0D0D0D; --paper:#F2EDE6; --cream:#FAF7F2;
+  --w1:#1C3F8C; --w2:#0E6B5E; --w3:#B84A0C; --w4:#5C1A8A; --w5:#991828;
+  --gold:#D4A017; --line:#D6CFC4; --danger:#CC1B1B; --success:#1A7A3C;
+  --font-d:'Bebas Neue',sans-serif; --font-s:'Libre Baskerville',serif; --font-m:'Space Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:var(--font-s);font-size:15px;line-height:1.7;overflow-x:hidden}
+::selection{background:var(--gold);color:var(--ink)}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--paper)}::-webkit-scrollbar-thumb{background:var(--ink)}
+
+/* ═══════════════════════════════════════
+   LOGIN SCREEN
+═══════════════════════════════════════ */
+#loginScreen {
+  position:fixed;inset:0;z-index:9999;
+  background:var(--ink);
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:0;
+}
+.login-box {
+  width:100%;max-width:440px;padding:0 24px;
+}
+.login-logo {
+  font-family:var(--font-d);font-size:3rem;color:var(--paper);
+  letter-spacing:.08em;text-align:center;margin-bottom:4px;
+}
+.login-logo span{color:var(--gold)}
+.login-sub {
+  font-family:var(--font-m);font-size:10px;letter-spacing:.2em;
+  color:rgba(242,237,230,.3);text-align:center;text-transform:uppercase;margin-bottom:36px;
+}
+.login-tabs {
+  display:flex;border:1px solid rgba(255,255,255,.1);margin-bottom:24px;
+}
+.login-tab {
+  flex:1;padding:10px;text-align:center;
+  font-family:var(--font-m);font-size:11px;letter-spacing:.1em;
+  color:rgba(255,255,255,.4);cursor:pointer;transition:all .2s;text-transform:uppercase;
+  border:none;background:transparent;
+}
+.login-tab.active{background:rgba(255,255,255,.08);color:var(--gold)}
+.login-field{margin-bottom:16px}
+.login-field label{
+  display:block;font-family:var(--font-m);font-size:9px;letter-spacing:.2em;
+  text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:6px;
+}
+.login-field input{
+  width:100%;background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.1);color:var(--paper);
+  font-family:var(--font-s);font-size:14px;padding:10px 14px;outline:none;
+  transition:border-color .2s;
+}
+.login-field input:focus{border-color:var(--gold)}
+.login-field input::placeholder{color:rgba(255,255,255,.2);font-style:italic}
+.login-btn {
+  width:100%;background:var(--gold);color:var(--ink);
+  font-family:var(--font-d);font-size:1.3rem;letter-spacing:.1em;
+  border:none;padding:12px;cursor:pointer;
+  transition:opacity .2s;margin-top:8px;
+}
+.login-btn:hover{opacity:.85}
+.login-err{
+  font-family:var(--font-m);font-size:11px;color:#FF6B6B;
+  margin-top:8px;text-align:center;min-height:16px;
+}
+.login-hint{
+  font-family:var(--font-m);font-size:9px;color:rgba(255,255,255,.15);
+  text-align:center;margin-top:20px;letter-spacing:.1em;
+}
+
+/* ═══════════════════════════════════════
+   ADMIN PANEL
+═══════════════════════════════════════ */
+#adminPanel{min-height:100vh;background:var(--ink);color:var(--paper)}
+.admin-nav{
+  background:#111;border-bottom:1px solid rgba(255,255,255,.08);
+  display:flex;align-items:center;padding:0 28px;height:52px;gap:20px;position:sticky;top:0;z-index:100;
+}
+.admin-brand{font-family:var(--font-d);font-size:1.3rem;letter-spacing:.08em;color:var(--gold);flex:1}
+.admin-navbtn{
+  font-family:var(--font-m);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  color:rgba(255,255,255,.4);padding:6px 12px;border:1px solid transparent;
+  cursor:pointer;transition:all .2s;background:transparent;
+}
+.admin-navbtn.active,.admin-navbtn:hover{color:var(--gold);border-color:rgba(212,160,23,.3)}
+.admin-logout{color:#FF6B6B;border-color:rgba(255,107,107,.2)}
+
+.admin-content{padding:32px 36px;max-width:1100px;margin:0 auto}
+.admin-section{display:none}
+.admin-section.active{display:block}
+
+.admin-h1{font-family:var(--font-d);font-size:2rem;letter-spacing:.06em;color:var(--gold);margin-bottom:6px}
+.admin-h2{font-family:var(--font-d);font-size:1.3rem;letter-spacing:.04em;color:rgba(255,255,255,.8);margin-bottom:20px}
+.admin-p{font-family:var(--font-m);font-size:11px;color:rgba(255,255,255,.35);letter-spacing:.06em;margin-bottom:28px}
+
+/* CARDS */
+.admin-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:32px}
+.stat-card{
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+  padding:20px;
+}
+.stat-num{font-family:var(--font-d);font-size:2.8rem;color:var(--gold);line-height:1}
+.stat-label{font-family:var(--font-m);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-top:4px}
+
+/* WEEKS CONTROL */
+.weeks-control{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:32px}
+.week-ctrl{border:1px solid rgba(255,255,255,.08);padding:18px 14px;text-align:center}
+.week-ctrl .wc-num{font-family:var(--font-d);font-size:2rem;margin-bottom:4px}
+.week-ctrl .wc-name{font-family:var(--font-m);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:14px;line-height:1.4}
+.toggle-btn{
+  width:100%;padding:7px;border:none;cursor:pointer;
+  font-family:var(--font-m);font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+  transition:all .2s;
+}
+.toggle-btn.on{background:var(--success);color:#fff}
+.toggle-btn.off{background:rgba(255,255,255,.06);color:rgba(255,255,255,.4)}
+
+/* STUDENT TABLE */
+.admin-table{width:100%;border-collapse:collapse;margin-top:16px}
+.admin-table th{
+  padding:10px 14px;text-align:left;
+  font-family:var(--font-m);font-size:9px;letter-spacing:.15em;text-transform:uppercase;
+  color:rgba(255,255,255,.3);border-bottom:1px solid rgba(255,255,255,.08);
+}
+.admin-table td{
+  padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.05);
+  font-family:var(--font-m);font-size:11px;vertical-align:middle;
+}
+.admin-table tr:hover td{background:rgba(255,255,255,.02)}
+.badge{
+  display:inline-block;padding:2px 8px;
+  font-family:var(--font-m);font-size:9px;letter-spacing:.08em;text-transform:uppercase;
+}
+.badge.online{background:rgba(26,122,60,.2);color:#4CAF7D;border:1px solid rgba(26,122,60,.3)}
+.badge.offline{background:rgba(255,255,255,.05);color:rgba(255,255,255,.3);border:1px solid rgba(255,255,255,.08)}
+.badge.warn{background:rgba(204,27,27,.15);color:#FF6B6B;border:1px solid rgba(204,27,27,.3)}
+.prog-mini{width:80px;height:6px;background:rgba(255,255,255,.08);display:inline-block;vertical-align:middle}
+.prog-mini-fill{height:100%;background:var(--gold);transition:width .5s}
+.action-btn{
+  background:transparent;border:1px solid rgba(255,255,255,.1);
+  color:rgba(255,255,255,.4);font-family:var(--font-m);font-size:9px;
+  letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;cursor:pointer;
+  transition:all .2s;
+}
+.action-btn:hover{border-color:var(--gold);color:var(--gold)}
+.action-btn.del:hover{border-color:#FF6B6B;color:#FF6B6B}
+
+/* ANTI-IA LOG TABLE */
+.aiai-row{background:rgba(204,27,27,.04)}
+.aiai-row td:first-child::before{content:'⚠ ';color:#FF6B6B}
+
+/* FORMS */
+.admin-form{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+.admin-form.single{grid-template-columns:1fr}
+.admin-field label{
+  display:block;font-family:var(--font-m);font-size:9px;letter-spacing:.15em;
+  text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:5px;
+}
+.admin-field input,.admin-field select{
+  width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);
+  color:var(--paper);font-family:var(--font-s);font-size:13px;padding:9px 12px;outline:none;
+  transition:border-color .2s;
+}
+.admin-field input:focus,.admin-field select:focus{border-color:var(--gold)}
+.admin-field select option{background:#1a1a1a}
+.admin-submit{
+  background:var(--gold);color:var(--ink);border:none;
+  font-family:var(--font-d);font-size:1.1rem;letter-spacing:.08em;
+  padding:10px 24px;cursor:pointer;transition:opacity .2s;
+}
+.admin-submit:hover{opacity:.85}
+.admin-msg{font-family:var(--font-m);font-size:11px;margin-top:8px;min-height:16px}
+.admin-msg.ok{color:#4CAF7D} .admin-msg.err{color:#FF6B6B}
+
+.divider{border:none;border-top:1px solid rgba(255,255,255,.07);margin:28px 0}
+
+/* ═══════════════════════════════════════
+   VISTA CONTROL — solo una vista activa
+═══════════════════════════════════════ */
+#adminPanel  { display:none !important }
+#studentApp  { display:none !important }
+body.show-admin   #adminPanel { display:block !important }
+body.show-student #studentApp { display:block !important }
+
+/* NAV */
+.prog-nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  background:var(--ink);display:flex;align-items:center;
+  overflow-x:auto;-webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+}
+.prog-nav::-webkit-scrollbar{display:none}
+  padding:0 28px;height:48px;gap:16px;
+}
+.prog-nav .brand{font-family:var(--font-d);font-size:15px;letter-spacing:.1em;color:var(--paper);flex:1;white-space:nowrap}
+.weeks-nav{display:flex;gap:4px;align-items:center}
+.wdot{
+  width:29px;height:29px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-m);font-size:11px;font-weight:700;
+  color:#fff;cursor:pointer;text-decoration:none;
+  transition:transform .2s,opacity .2s;border:2px solid rgba(255,255,255,.15);
+  position:relative;
+}
+.wdot:hover{transform:scale(1.15)}
+.wdot.w1{background:var(--w1)}.wdot.w2{background:var(--w2)}.wdot.w3{background:var(--w3)}.wdot.w4{background:var(--w4)}.wdot.w5{background:var(--w5)}
+.wdot.locked{background:#444;cursor:not-allowed;opacity:.45}
+.wdot.locked:hover{transform:none}
+.lock-icon{font-size:9px;position:absolute;bottom:-2px;right:-2px;background:#222;border-radius:50%;width:12px;height:12px;display:flex;align-items:center;justify-content:center}
+.student-tag{font-family:var(--font-m);font-size:10px;color:rgba(255,255,255,.3);letter-spacing:.08em}
+
+.prog-bar-outer{position:fixed;top:48px;left:0;right:0;z-index:199;height:3px;background:rgba(0,0,0,.1)}
+#barraProgreso{height:100%;width:0%;background:linear-gradient(90deg,var(--w1),var(--w4),var(--w5));transition:width .4s ease}
+
+/* WEEK LOCKED overlay */
+.week-locked-notice{
+  background:rgba(60,30,0,.08);border:2px dashed rgba(184,74,12,.3);
+  padding:24px;text-align:center;margin:20px 0;display:none;
+}
+.week-locked-notice.show{display:block}
+.week-locked-notice p{font-family:var(--font-m);font-size:11px;letter-spacing:.08em;color:var(--w3)}
+
+/* PAGE */
+.page{max-width:860px;margin:0 auto;padding:0 28px 80px}
+
+/* HERO */
+.hero{
+  min-height:100vh;background:var(--ink);
+  display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;padding:80px 40px 60px;
+}
+.hero-texture{
+  position:absolute;inset:0;z-index:0;
+  background-image:
+    repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(255,255,255,.03) 39px,rgba(255,255,255,.03) 40px),
+    repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(255,255,255,.03) 39px,rgba(255,255,255,.03) 40px);
+}
+.hero-inner{position:relative;z-index:1;width:100%;max-width:860px}
+.hero-kicker{font-family:var(--font-m);font-size:10px;letter-spacing:.2em;color:var(--gold);text-transform:uppercase;margin-bottom:24px;display:flex;align-items:center;gap:12px}
+.hero-kicker::before{content:'';display:block;width:32px;height:1px;background:var(--gold)}
+.hero-title{font-family:var(--font-d);font-size:clamp(4rem,11vw,8rem);line-height:.88;color:var(--paper);letter-spacing:.02em;margin-bottom:16px}
+.hero-title .accent{color:var(--gold)}
+.hero-title .line2{display:block;font-family:var(--font-s);font-style:italic;font-size:clamp(1.4rem,4vw,2.4rem);font-weight:400;color:rgba(242,237,230,.4);letter-spacing:0;margin-top:12px}
+.hero-desc{font-family:var(--font-m);font-size:11px;color:rgba(242,237,230,.3);letter-spacing:.1em;text-transform:uppercase;margin-top:28px;border-top:1px solid rgba(255,255,255,.07);padding-top:20px;display:flex;gap:32px;flex-wrap:wrap}
+.hero-desc span{display:flex;align-items:center;gap:6px}
+.hero-desc span::before{content:'·';color:var(--gold)}
+.week-pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:28px}
+.week-pill{display:flex;align-items:center;gap:8px;padding:7px 14px 7px 8px;border:1px solid rgba(255,255,255,.1);font-family:var(--font-m);font-size:10px;color:rgba(242,237,230,.6);text-decoration:none;transition:all .2s;letter-spacing:.06em}
+.week-pill:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.22);transform:translateY(-2px)}
+.week-pill.pill-locked{opacity:.3;cursor:not-allowed;pointer-events:none}
+.week-pill .pnum{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff}
+.student-card{margin-top:32px;border:1px solid rgba(255,255,255,.08);padding:22px;display:grid;grid-template-columns:1fr 1fr;gap:18px;background:rgba(255,255,255,.02)}
+.student-card .field label{display:block;font-family:var(--font-m);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.28);margin-bottom:5px}
+.student-card .field input{border:none;border-bottom:1px solid rgba(255,255,255,.12);background:transparent;color:var(--paper);font-family:var(--font-s);font-size:14px;width:100%;padding:3px 0;outline:none}
+.student-card .field input::placeholder{color:rgba(255,255,255,.13);font-style:italic}
+
+/* SECTION DIVIDER */
+.sec-divider{display:flex;align-items:center;gap:14px;margin:52px 0 22px;padding-bottom:12px;border-bottom:2px solid var(--ink)}
+.sd-icon{font-size:1.1rem}
+.sec-divider h2{font-family:var(--font-d);font-size:1.55rem;letter-spacing:.06em;color:var(--ink);line-height:1}
+
+/* WEEK HEADER */
+.week-header{position:relative;margin:56px 0 28px;padding:34px 34px 34px 106px;min-height:108px;display:flex;flex-direction:column;justify-content:center;overflow:hidden}
+.week-header::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(-45deg,transparent,transparent 4px,rgba(0,0,0,.04) 4px,rgba(0,0,0,.04) 5px)}
+.week-header .num-bg{position:absolute;left:0;top:0;bottom:0;width:86px;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.18);z-index:1}
+.week-header .num-bg span{font-family:var(--font-d);font-size:4rem;color:rgba(255,255,255,.22)}
+.week-header .wlabel{position:relative;z-index:1;font-family:var(--font-m);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:3px}
+.week-header .wtitle{position:relative;z-index:1;font-family:var(--font-d);font-size:2rem;color:#fff;line-height:1;letter-spacing:.04em}
+.week-header .wsubtitle{position:relative;z-index:1;font-family:var(--font-s);font-style:italic;font-size:13px;color:rgba(255,255,255,.5);margin-top:5px}
+.wh1{background:var(--w1)}.wh2{background:var(--w2)}.wh3{background:var(--w3)}.wh4{background:var(--w4)}.wh5{background:var(--w5)}
+
+/* ACT CARD */
+.act-card{background:var(--cream);border:1.5px solid var(--line);margin-bottom:24px;overflow:hidden}
+.act-header{display:flex;align-items:stretch}
+.act-num{width:62px;flex-shrink:0;display:flex;align-items:center;justify-content:center;flex-direction:column;font-family:var(--font-d);font-size:2rem;color:#fff;padding:18px 0;letter-spacing:.04em}
+.act-num .act-label{font-family:var(--font-m);font-size:8px;letter-spacing:.12em;opacity:.6}
+.act-title-block{flex:1;padding:14px 18px;display:flex;align-items:center;border-left:4px solid currentColor}
+.act-title-block h3{font-family:var(--font-d);font-size:1.15rem;font-weight:400;letter-spacing:.04em;color:var(--ink)}
+.act-body{padding:22px 26px}
+
+/* CALLOUTS */
+.callout{padding:13px 16px 13px 48px;margin:14px 0;position:relative;font-size:13.5px;font-family:var(--font-s)}
+.callout::before{position:absolute;left:13px;top:13px;font-size:15px;line-height:1}
+.callout.info{background:#E3F2EF;border-left:3px solid var(--w2);color:#0A3D35}
+.callout.info::before{content:"💡"}
+.callout.note{background:#FEF3E5;border-left:3px solid var(--w3);color:#4A2400}
+.callout.note::before{content:"📌"}
+.callout.mission{background:#F0EAFA;border-left:3px solid var(--w4);color:#35094A}
+.callout.mission::before{content:"🎯"}
+.callout.code{background:#EAF0EA;border-left:3px solid #2A7A2A;color:#133313}
+.callout.code::before{content:"🔑"}
+.callout.dna{background:#E8EDF8;border-left:3px solid var(--w1);color:#0C1D45;font-family:var(--font-m);font-size:12px;letter-spacing:.07em}
+.callout.dna::before{content:"🧬"}
+.callout strong{font-weight:700}
+
+/* QUESTIONS */
+.questions{display:flex;flex-direction:column;gap:16px}
+.q-label{font-family:var(--font-s);font-size:.88rem;font-weight:700;color:var(--ink);margin-bottom:5px;display:flex;gap:9px;align-items:baseline}
+.qnum{display:inline-flex;width:21px;height:21px;border-radius:50%;align-items:center;justify-content:center;font-family:var(--font-m);font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
+.qtext{font-weight:400;font-size:14px;line-height:1.5}
+.answer-lines{width:100%;border:1.5px solid var(--line);padding:10px 13px;font-family:var(--font-s);font-size:13.5px;background:#fff;min-height:78px;resize:vertical;line-height:1.65;color:var(--ink);transition:border-color .2s;outline:none}
+.answer-lines:focus{border-color:var(--ink)}
+.answer-lines.sm{min-height:48px}.answer-lines.lg{min-height:118px}.answer-lines.xl{min-height:155px}
+
+/* PUNNETT */
+.punnett-wrap{margin:12px 0}
+.punnett-wrap>label{font-family:var(--font-m);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#888;margin-bottom:7px;display:block}
+.punnett{display:inline-grid;border:2px solid var(--ink);overflow:hidden}
+.punnett.p2{grid-template-columns:54px 86px 86px}
+.punnett.p4{grid-template-columns:54px repeat(4,76px)}
+.cell{border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-family:var(--font-m);font-size:13px;font-weight:700}
+.cell.hdr{background:#E8EDF8;color:var(--w1);min-height:42px;font-size:15px}
+.cell.empty-hdr{background:#E8EDF8;min-height:42px}
+.cell.ans{background:#fff;min-height:68px}
+.punnett-input{border:none;background:transparent;text-align:center;font-family:var(--font-m);font-size:14px;font-weight:700;width:100%;height:100%;outline:none;color:var(--ink);min-height:42px}
+
+/* TABLES */
+.data-table{width:100%;border-collapse:collapse;margin:11px 0;border:1.5px solid var(--line)}
+.data-table th{padding:9px 13px;text-align:left;font-family:var(--font-m);font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#fff}
+.data-table td{padding:7px 13px;border-bottom:1px solid var(--line);font-family:var(--font-s);font-size:13.5px}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tr:nth-child(even) td{background:#FAFAF8}
+.data-table td input,.data-table td textarea{border:none;background:transparent;width:100%;font-family:var(--font-s);font-size:13.5px;color:var(--ink);outline:none;min-height:30px;resize:none}
+
+/* GLOSSARY */
+.glossary-grid{display:grid;grid-template-columns:1fr 2fr;border:1.5px solid var(--ink);overflow:hidden}
+.gh{padding:9px 15px;font-family:var(--font-d);font-size:.95rem;letter-spacing:.06em;color:#fff}
+.gc-term{border-top:1px solid var(--line);border-right:1px solid var(--line);background:#EFF7F5;padding:3px 11px}
+.gc-def{border-top:1px solid var(--line);padding:3px 11px}
+.glossary-grid input{border:none;background:transparent;width:100%;font-family:var(--font-s);font-size:13px;color:var(--ink);outline:none;padding:4px 0;min-height:30px}
+
+/* METACOG */
+.metacog-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:10px 0}
+.metacog-card{border:1.5px solid var(--line);padding:14px;display:flex;flex-direction:column;gap:7px}
+.mc-icon{font-size:1.3rem}.mc-label{font-family:var(--font-d);letter-spacing:.06em;font-size:.95rem;color:var(--ink)}
+.mc-green{background:#EEF8EE;border-color:#7CB87C}.mc-red{background:#FEEEEE;border-color:#D07070}.mc-amber{background:#FFF8E6;border-color:var(--gold)}
+
+/* RUBRIC */
+.rubric-table{width:100%;border-collapse:collapse;border:1.5px solid var(--ink)}
+.rubric-table th{padding:9px 11px;background:var(--ink);color:var(--paper);font-family:var(--font-m);font-size:9px;letter-spacing:.1em;text-transform:uppercase}
+.rubric-table td{padding:9px 11px;border:1px solid var(--line);font-family:var(--font-s);font-size:13px}
+.check-cell{text-align:center}
+.check-cell input[type="checkbox"]{width:15px;height:15px;cursor:pointer}
+
+/* CODE FIELD */
+.code-field{display:flex;align-items:center;gap:11px;background:#EAF0EA;border:1.5px solid #2A7A2A;padding:11px 16px;margin-top:14px}
+.code-label{font-family:var(--font-m);font-size:11px;font-weight:700;letter-spacing:.09em;color:#2A7A2A;white-space:nowrap}
+.code-field input{border:none;background:transparent;color:#2A7A2A;font-family:var(--font-m);font-size:14px;font-weight:700;outline:none;flex:1}
+.code-field .muted{color:#888;font-size:11px;font-family:var(--font-m);white-space:nowrap}
+
+/* STATION */
+.station{border:2px solid var(--ink);padding:22px;margin-bottom:22px;position:relative}
+.station-badge{position:absolute;top:-13px;left:18px;background:var(--ink);color:var(--paper);font-family:var(--font-d);font-size:.95rem;letter-spacing:.08em;padding:2px 13px}
+
+/* FINAL CODE */
+.final-code{background:var(--ink);color:var(--paper);border:2px solid var(--gold);padding:30px 26px;margin-top:36px}
+.fc-title{font-family:var(--font-d);font-size:1.5rem;letter-spacing:.08em;color:var(--gold);margin-bottom:22px}
+.fc-codes{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+.slot{border:1px solid rgba(255,255,255,.12);padding:12px}
+.slot .st{font-family:var(--font-m);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:7px}
+.slot input{border:none;border-bottom:1px solid rgba(255,255,255,.18);background:transparent;color:var(--gold);font-family:var(--font-m);font-size:13px;font-weight:700;width:100%;outline:none;padding:3px 0}
+.fc-password{font-family:var(--font-m);font-size:10px;letter-spacing:.09em;color:rgba(255,255,255,.35);margin-bottom:7px;text-transform:uppercase}
+.fc-answer{width:100%;border:none;border-bottom:2px solid var(--gold);background:transparent;color:var(--gold);font-family:var(--font-d);font-size:1.8rem;letter-spacing:.1em;outline:none;padding:7px 0}
+
+/* INLINE FILL */
+.inline-fill{border:none;border-bottom:2px solid currentColor;background:transparent;font-size:inherit;font-family:inherit;width:46px;text-align:center;outline:none}
+
+/* SAVE / EDIT BUTTONS */
+.act-footer{display:flex;align-items:center;gap:10px;margin-top:20px;padding-top:16px;border-top:1.5px dashed var(--line)}
+.save-btn{
+  display:inline-flex;align-items:center;gap:7px;
+  background:var(--ink);color:var(--paper);
+  border:none;cursor:pointer;
+  font-family:var(--font-m);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  padding:10px 20px;transition:background .2s;
+}
+.save-btn:hover{background:#333}
+.save-btn:disabled{background:#aaa;cursor:default}
+.edit-btn{
+  display:inline-flex;align-items:center;gap:7px;
+  background:transparent;color:var(--ink);
+  border:1.5px solid var(--ink);cursor:pointer;
+  font-family:var(--font-m);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  padding:9px 18px;transition:all .2s;
+}
+.edit-btn:hover{background:var(--ink);color:var(--paper)}
+.save-confirm{
+  font-family:var(--font-m);font-size:10px;letter-spacing:.08em;
+  color:var(--success);padding:6px 10px;
+  background:#EEF8EE;border:1px solid #7CB87C;
+  display:none;
+}
+.act-locked-msg{
+  font-family:var(--font-m);font-size:10px;letter-spacing:.09em;text-transform:uppercase;
+  color:#aaa;border:1px dashed #ccc;padding:8px 14px;
+}
+
+/* METACOG LOCKED */
+.metacog-block{margin-bottom:26px}
+.metacog-block .metacog-locked{
+  border:1.5px dashed var(--line);
+  background:#F8F8F6;
+  padding:14px 18px;
+  font-family:var(--font-m);font-size:10px;letter-spacing:.09em;text-transform:uppercase;
+  color:#aaa;display:flex;align-items:center;gap:10px;
+}
+.metacog-block .metacog-content{display:none}
+.metacog-block.unlocked .metacog-locked{display:none}
+.metacog-block.unlocked .metacog-content{display:block}
+
+/* ═══════════════════════════════════════
+   MOBILE RESPONSIVE — Android & iOS
+═══════════════════════════════════════ */
+
+/* Touch targets mínimos 44px para iOS/Android */
+button, .login-btn, .admin-submit, .save-btn, .edit-btn, .action-btn, .toggle-btn, .admin-navbtn, .login-tab {
+  min-height: 44px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Inputs más grandes en táctil */
+.login-field input, .admin-field input, .admin-field select,
+input[type="text"], input[type="password"], input[type="number"] {
+  min-height: 44px;
+  font-size: 16px !important; /* Evita zoom automático en iOS */
+}
+
+textarea.answer-lines {
+  font-size: 16px; /* Evita zoom automático en iOS */
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Fix position:fixed en iOS Safari */
+.prog-nav, .prog-bar-outer {
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+/* Scrolling suave en iOS */
+body, .admin-content, .page {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Fix input focus en iOS */
+input, textarea, select {
+  -webkit-appearance: none;
+  border-radius: 0;
+}
+
+/* Pantallas pequeñas (≤480px — teléfonos) */
+@media (max-width: 480px) {
+  /* Login */
+  .login-logo { font-size: 2.2rem; }
+  .login-box { padding: 0 16px; }
+
+  /* Admin nav — scroll horizontal */
+  .admin-nav {
+    flex-wrap: wrap;
+    height: auto;
+    padding: 8px 12px;
+    gap: 6px;
+  }
+  .admin-brand { font-size: 1rem; flex: 0 0 100%; margin-bottom: 4px; }
+  .admin-navbtn { font-size: 9px; padding: 4px 8px; min-height: 36px; }
+  .admin-content { padding: 16px 14px; }
+
+  /* Stats grid — 2 columnas */
+  .admin-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+
+  /* Weeks control — 1 columna */
+  .weeks-control { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+
+  /* Forms — 1 columna */
+  .admin-form { grid-template-columns: 1fr; }
+
+  /* Student nav */
+  .prog-nav { padding: 0 12px; height: 44px; }
+  .prog-nav .brand { font-size: 12px; }
+  .wdot { width: 26px; height: 26px; font-size: 10px; }
+
+  /* Hero */
+  .hero { padding: 60px 16px 40px; }
+  .hero-title { font-size: clamp(3rem, 14vw, 5rem); }
+  .student-card { grid-template-columns: 1fr; }
+  .hero-desc { gap: 12px; font-size: 9px; }
+
+  /* Página */
+  .page { padding: 0 14px 60px; }
+
+  /* Week headers */
+  .week-header { padding: 22px 18px 22px 80px; }
+  .week-header .wtitle { font-size: 1.4rem; }
+
+  /* Activity cards */
+  .act-body { padding: 14px 14px; }
+  .act-num { width: 50px; font-size: 1.6rem; }
+
+  /* Tables — scroll horizontal */
+  .admin-table, .data-table, .rubric-table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+  }
+
+  /* Punnett scroll */
+  .punnett-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+  /* Glossary — 1 columna */
+  .glossary-grid { grid-template-columns: 1fr; }
+
+  /* Metacog — 1 columna */
+  .metacog-grid { grid-template-columns: 1fr; }
+
+  /* Final code — 2 columnas */
+  .fc-codes { grid-template-columns: repeat(2, 1fr); }
+
+  /* Act footer */
+  .act-footer { flex-wrap: wrap; gap: 8px; }
+  .save-btn, .edit-btn { width: 100%; justify-content: center; }
+
+  /* Sec divider */
+  .sec-divider h2 { font-size: 1.2rem; }
+}
+
+/* Tablets (481px–768px) */
+@media (min-width: 481px) and (max-width: 768px) {
+  .admin-nav { padding: 0 16px; gap: 10px; }
+  .admin-content { padding: 20px 20px; }
+  .weeks-control { grid-template-columns: repeat(3, 1fr); }
+  .student-card { grid-template-columns: 1fr 1fr; }
+  .hero { padding: 70px 24px 48px; }
+  .page { padding: 0 20px 60px; }
+  .metacog-grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* Pantallas medianas admin */
+@media (max-width: 768px) {
+  .admin-table td, .admin-table th { padding: 8px 8px; font-size: 10px; }
+  .prog-mini { width: 50px; }
+}
+
+/* ANTI-IA WARNING TOAST */
+#antiIaToast{
+  position:fixed;top:60px;left:50%;transform:translateX(-50%);
+  background:#CC1B1B;color:#fff;
+  font-family:var(--font-m);font-size:11px;letter-spacing:.08em;
+  padding:10px 24px;z-index:9998;
+  display:none;text-align:center;
+  border-bottom:3px solid #FF6B6B;
+  animation:slideDown .3s ease;
+}
+@keyframes slideDown{from{transform:translateX(-50%) translateY(-20px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
+
+/* SP */
+.sp{margin-top:14px}.sp2{margin-top:24px}
+.muted{color:#888;font-size:12px;font-family:var(--font-m)}
+p{margin:7px 0;font-size:14px}ul{padding-left:18px;font-size:14px}ul li{margin:3px 0}b{font-weight:700}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+.fade-up{animation:fadeUp .65s ease both}
+.d1{animation-delay:.1s}.d2{animation-delay:.2s}.d3{animation-delay:.3s}.d4{animation-delay:.42s}
+
+@media(max-width:620px){
+  .metacog-grid{grid-template-columns:1fr}
+  .fc-codes{grid-template-columns:1fr 1fr}
+  .student-card{grid-template-columns:1fr}
+  .weeks-control{grid-template-columns:repeat(3,1fr)}
+  .admin-form{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════
+     LOGIN SCREEN
+════════════════════════════════════════════════════════ -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">GENCODE<span>·</span>SISTEMA</div>
+    <div class="login-sub">Herencia bajo la lupa · 4to. Grado</div>
+
+    <div class="login-tabs">
+      <button class="login-tab active" onclick="setLoginMode('student')">Estudiante</button>
+      <button class="login-tab" onclick="setLoginMode('admin')">Administrador</button>
+    </div>
+
+    <!-- STUDENT LOGIN -->
+    <div id="studentLoginForm">
+      <div class="login-field"><label>Código de estudiante</label><input id="sCode" type="text" placeholder="Tu código único (ej: EST-001)" autocomplete="off"></div>
+      <div class="login-field"><label>Contraseña</label><input id="sPass" type="password" placeholder="Contraseña"></div>
+      <button class="login-btn" onclick="loginStudent()">INGRESAR AL CUADERNO</button>
+      <div class="login-err" id="sErr"></div>
+    </div>
+
+    <!-- ADMIN LOGIN -->
+    <div id="adminLoginForm" style="display:none">
+      <div class="login-field"><label>Usuario administrador</label><input id="aUser" type="text" placeholder="admin" autocomplete="off"></div>
+      <div class="login-field"><label>Contraseña maestra</label><input id="aPass" type="password" placeholder="Contraseña"></div>
+      <button class="login-btn" onclick="loginAdmin()">ACCEDER AL PANEL</button>
+      <div class="login-err" id="aErr"></div>
+    </div>
+
+    <div class="login-hint">SISTEMA GENCODE v2.0 · ACCESO SEGURO</div>
+    <div style="text-align:center;margin-top:14px">
+      <button id="installAppBtn" onclick="installApp()" style="display:none;background:transparent;border:1px solid rgba(212,160,23,.4);color:var(--gold);font-family:var(--font-m);font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:8px 20px;cursor:pointer;gap:6px;align-items:center">
+        ⬇ INSTALAR COMO APP
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     ADMIN PANEL
+════════════════════════════════════════════════════════ -->
+<div id="adminPanel">
+  <nav class="admin-nav">
+    <div class="admin-brand">⚙ PANEL GENCODE</div>
+    <button class="admin-navbtn active" onclick="adminTab('dashboard')">Dashboard</button>
+    <button class="admin-navbtn" onclick="adminTab('semanas')">Semanas</button>
+    <button class="admin-navbtn" onclick="adminTab('estudiantes')">Estudiantes</button>
+    <button class="admin-navbtn" onclick="adminTab('alertas')">Anti-IA</button>
+    <button class="admin-navbtn" onclick="adminTab('config')">Configuración</button>
+    <button class="admin-navbtn admin-logout" onclick="logout()">Salir</button>
+  </nav>
+
+  <div class="admin-content">
+
+    <!-- DASHBOARD -->
+    <div id="tab-dashboard" class="admin-section active">
+      <div class="admin-h1">Dashboard</div>
+      <div class="admin-p">RESUMEN EN TIEMPO REAL DEL SISTEMA GENCODE</div>
+      <div class="admin-grid" id="statsGrid"></div>
+      <hr class="divider">
+      <div class="admin-h2">Actividad reciente de estudiantes</div>
+      <table class="admin-table">
+        <thead><tr><th>Estudiante</th><th>Código</th><th>Progreso</th><th>Última actividad</th><th>Estado</th><th>Alertas IA</th></tr></thead>
+        <tbody id="dashStudentList"></tbody>
+      </table>
+    </div>
+
+    <!-- SEMANAS -->
+    <div id="tab-semanas" class="admin-section">
+      <div class="admin-h1">Control de Semanas</div>
+      <div class="admin-p">ACTIVA O DESACTIVA CADA SEMANA PARA TODOS LOS ESTUDIANTES</div>
+      <div class="weeks-control" id="weeksControlGrid"></div>
+      <hr class="divider">
+      <div class="callout info" style="background:rgba(14,107,94,.08);border-color:var(--w2);color:#0A3D35;margin:0">
+        <strong>Nota:</strong> Los cambios se aplican de inmediato. Los estudiantes verán las semanas bloqueadas la próxima vez que recarguen su página. La Semana 1 siempre debe estar activa.
+      </div>
+    </div>
+
+    <!-- ESTUDIANTES -->
+    <div id="tab-estudiantes" class="admin-section">
+      <div class="admin-h1">Gestión de Estudiantes</div>
+      <div class="admin-p">REGISTRA, EDITA Y MONITOREA EL ACCESO DE CADA ESTUDIANTE</div>
+
+      <div class="admin-h2">Agregar nuevo estudiante</div>
+      <div class="admin-form" id="addStudentForm">
+        <div class="admin-field"><label>Nombre completo</label><input id="newName" placeholder="Nombre del estudiante"></div>
+        <div class="admin-field"><label>Código único</label><input id="newCode" placeholder="Ej: EST-001"></div>
+        <div class="admin-field"><label>Contraseña</label><input id="newPass" type="password" placeholder="Contraseña de acceso"></div>
+        <div class="admin-field"><label>Grado / Sección</label><input id="newGrade" placeholder="Ej: 4to. A"></div>
+      </div>
+      <button class="admin-submit" onclick="addStudent()">+ REGISTRAR ESTUDIANTE</button>
+      <div class="admin-msg" id="addMsg"></div>
+
+      <hr class="divider">
+      <div class="admin-h2">Lista de estudiantes registrados</div>
+      <table class="admin-table">
+        <thead><tr><th>Nombre</th><th>Código</th><th>Grado</th><th>Progreso</th><th>Alertas IA</th><th>Último acceso</th><th>Acciones</th></tr></thead>
+        <tbody id="studentTableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- ANTI-IA -->
+    <div id="tab-alertas" class="admin-section">
+      <div class="admin-h1">Monitor Anti-IA</div>
+      <div class="admin-p">DETECCIÓN DE POSIBLE USO DE INTELIGENCIA ARTIFICIAL EN RESPUESTAS</div>
+      <div class="callout note" style="margin-bottom:20px">
+        <strong>¿Cómo funciona?</strong> El sistema analiza las respuestas en tiempo real detectando: <br>
+        • Texto pegado desde el portapapeles sin escritura previa<br>
+        • Respuestas de más de 80 palabras escritas en menos de 10 segundos<br>
+        • Patrones lingüísticos asociados a IA (frases características)<br>
+        • Cambio repentino de estilo o vocabulario dentro de la misma sesión
+      </div>
+      <div class="admin-grid" id="aiStatsGrid"></div>
+      <hr class="divider">
+      <div class="admin-h2">Registro de alertas</div>
+      <table class="admin-table">
+        <thead><tr><th>Estudiante</th><th>Campo</th><th>Tipo de alerta</th><th>Fragmento detectado</th><th>Fecha/Hora</th><th>Nivel</th></tr></thead>
+        <tbody id="aiAlertTable"></tbody>
+      </table>
+    </div>
+
+    <!-- CONFIG -->
+    <div id="tab-config" class="admin-section">
+      <div class="admin-h1">Configuración</div>
+      <div class="admin-p">AJUSTES DEL SISTEMA Y CREDENCIALES DE ADMINISTRADOR</div>
+
+      <div class="admin-h2">Cambiar contraseña de administrador</div>
+      <div class="admin-form single" style="max-width:400px">
+        <div class="admin-field"><label>Contraseña actual</label><input id="oldAdminPass" type="password" placeholder="Contraseña actual"></div>
+        <div class="admin-field"><label>Nueva contraseña</label><input id="newAdminPass1" type="password" placeholder="Nueva contraseña"></div>
+        <div class="admin-field"><label>Confirmar nueva contraseña</label><input id="newAdminPass2" type="password" placeholder="Repite la contraseña"></div>
+      </div>
+      <button class="admin-submit" onclick="changeAdminPass()">GUARDAR CAMBIOS</button>
+      <div class="admin-msg" id="configMsg"></div>
+
+      <hr class="divider">
+      <div class="admin-h2">Umbrales del sistema Anti-IA</div>
+      <div class="admin-form" style="max-width:600px">
+        <div class="admin-field"><label>Velocidad mínima (palabras/segundo para alerta)</label><input id="cfgSpeed" type="number" value="8" min="3" max="30"></div>
+        <div class="admin-field"><label>Palabras mínimas para analizar</label><input id="cfgMinWords" type="number" value="15" min="5" max="50"></div>
+      </div>
+      <button class="admin-submit" onclick="saveConfig()">GUARDAR CONFIGURACIÓN</button>
+      <div class="admin-msg" id="configMsg2"></div>
+
+      <hr class="divider">
+      <div class="admin-h2" style="color:#FF6B6B">Zona de peligro</div>
+      <button class="admin-submit" style="background:#CC1B1B;margin-right:10px" onclick="resetAllData()">BORRAR TODOS LOS DATOS</button>
+      <button class="admin-submit" style="background:#444" onclick="exportData()">EXPORTAR DATOS (JSON)</button>
+    </div>
+
+  </div><!-- /admin-content -->
+</div><!-- /adminPanel -->
+
+<!-- ═══════════════════════════════════════════════════════
+     STUDENT APP
+════════════════════════════════════════════════════════ -->
+<div id="studentApp"></div>
+
+
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  DATA LAYER — localStorage con fallback a memoria (iOS privado)
+// ═══════════════════════════════════════════════════════════
+const _memStore = {};
+const _lsAvailable = (()=>{
+  try { localStorage.setItem('__test__','1'); localStorage.removeItem('__test__'); return true; }
+  catch(e){ return false; }
+})();
+
+const DB = {
+  get(k){
+    try{
+      if(_lsAvailable){
+        const v=localStorage.getItem(k);
+        return v?JSON.parse(v):(_memStore[k]??null);
+      }
+      return _memStore[k]??null;
+    }catch{ return _memStore[k]??null; }
+  },
+  set(k,v){
+    try{
+      _memStore[k]=v;
+      if(_lsAvailable) localStorage.setItem(k,JSON.stringify(v));
+    }catch{
+      _memStore[k]=v; // fallback silencioso
+    }
+  },
+  del(k){
+    try{
+      delete _memStore[k];
+      if(_lsAvailable) localStorage.removeItem(k);
+    }catch{ delete _memStore[k]; }
+  }
+};
+
+// ═══════════════════════════════════════════════════════════
+//  STUDENT APP TEMPLATE — injected on login to keep DOM clean
+// ═══════════════════════════════════════════════════════════
+const STUDENT_TEMPLATE = `
+<!-- ANTI-IA TOAST -->
+<div id="antiIaToast">⚠ ALERTA: Se ha detectado posible uso de IA. Esta actividad ha sido registrada.</div>
+
+<!-- NAV -->
+<nav class="prog-nav">
+  <span class="brand">HERENCIA BAJO LA LUPA</span>
+  <div class="weeks-nav" id="weeksNav"></div>
+  <span class="student-tag" id="studentTag"></span>
+  <button style="background:transparent;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.4);font-family:var(--font-m);font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:5px 10px;cursor:pointer" onclick="logout()">SALIR</button>
+</nav>
+<div class="prog-bar-outer"><div id="barraProgreso"></div></div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-texture"></div>
+  <canvas id="helixCanvas" style="position:absolute;right:0;top:0;bottom:0;width:200px;height:100%;opacity:.1;z-index:0"></canvas>
+  <div class="hero-inner page">
+    <p class="hero-kicker fade-up">Ministerio de Educación · ¡Secundaria Avanza! · 4to. Grado</p>
+    <h1 class="hero-title fade-up d1">CUADERNO DEL <span class="accent">ESTUDIANTE</span><span class="line2">Herencia bajo la lupa</span></h1>
+    <div class="hero-desc fade-up d2"><span>De los genes a su expresión</span><span>Ciencias de la Naturaleza</span><span>5 Semanas</span></div>
+    <div class="week-pills fade-up d3" id="heroPills"></div>
+    <div class="student-card fade-up d4">
+      <div class="field"><label>👤 Nombre completo</label><input id="sNombre" placeholder="Escribe tu nombre…" readonly></div>
+      <div class="field"><label>📚 Grado y sección</label><input id="sGrado" placeholder="Ej: 4to. A"></div>
+      <div class="field"><label>🏫 Centro educativo</label><input id="sColegio" placeholder="Nombre del colegio"></div>
+      <div class="field"><label>👩‍🏫 Docente</label><input id="sDocente" placeholder="Nombre del/la docente"></div>
+    </div>
+  </div>
+</section>
+
+<div class="page">
+
+<!-- ══ GLOSARIO ══ -->
+<div class="sec-divider"><span class="sd-icon">🔤</span><h2>Glosario de Genética</h2></div>
+<div class="callout info">Construye tu glosario a lo largo de toda la secuencia. Al terminar cada semana, agrega los términos nuevos que aprendiste con sus definiciones en tus propias palabras.</div>
+<div class="sp"></div>
+<div class="glossary-grid" id="glossaryGrid">
+  <div class="gh" style="background:var(--w2)">Término</div>
+  <div class="gh" style="background:var(--w2)">Definición</div>
+</div>
+
+<!-- ══ SEMANA 1 ══ -->
+<div id="sec-semana1">
+<div class="week-header wh1"><div class="num-bg"><span>1</span></div><span class="wlabel">Semana 1</span><h2 class="wtitle" id="semana1">HERENCIA MENDELIANA<br>Y LA ANEMIA FALCIFORME</h2><p class="wsubtitle">Cruzas, cuadros de Punnett, alelos y probabilidades</p></div>
+<div class="act-card">
+  <div class="act-header"><div class="act-num" style="background:var(--w1)">1<span class="act-label">ACT</span></div><div class="act-title-block" style="color:var(--w1);background:linear-gradient(90deg,#EBF1FF,transparent)"><h3>Explorando la herencia — La noticia de Helen Obando</h3></div></div>
+  <div class="act-body">
+
+    <!-- ANEXO 1 — Noticia periodística -->
+    <div style="border:2px solid var(--w1);margin-bottom:22px;overflow:hidden">
+      <div style="background:var(--w1);padding:8px 16px;display:flex;align-items:center;gap:10px">
+        <span style="font-family:var(--font-d);font-size:.85rem;color:#fff;letter-spacing:.1em">📰 ANEXO 1</span>
+        <span style="font-family:var(--font-m);font-size:9px;color:rgba(255,255,255,.5);letter-spacing:.1em;text-transform:uppercase">Artículo adaptado del New York Times · Fuente: Infobae · 15 de enero, 2020</span>
+      </div>
+      <div style="padding:20px 22px;background:#EBF1FF">
+        <h3 style="font-family:var(--font-s);font-size:1.15rem;font-weight:700;color:var(--w1);line-height:1.35;margin-bottom:14px">A los 16 años, es pionera en la cura de la anemia de células falciformes y está venciendo a la muerte</h3>
+        <p style="font-size:13px;margin-bottom:10px">En junio de 2019, <b>Helen Obando</b> se encontraba a la espera de una bolsa de células madre de su médula ósea, las cuales habían sido modificadas por medio de terapia génica, para que se les administrara por vía intravenosa.</p>
+        <p style="font-size:13px;margin-bottom:10px">Tenían la esperanza de que este tratamiento fuera la cura para su <b>anemia de células falciformes</b>, una enfermedad hereditaria de la sangre que puede provocar dolores insoportables, daño a los órganos y muerte prematura. La enfermedad afecta a personas que provienen del sur de Europa, Medio Oriente o Asia, y también a las de origen hispano, como Helen.</p>
+        <p style="font-size:13px;margin-bottom:10px">Al igual que muchas otras personas con problemas de células falciformes, la familia Obando sufrió un doble revés: no solo una hija nació con esa enfermedad, sino dos, Helen y su hermana mayor <b>Haylee Obando</b>. Tenían la esperanza de conseguir una cura: un peligroso, y a veces mortal, trasplante de médula ósea que, por lo general, se destina a aquellos pacientes que tienen un hermano sano que sea compatible. Pero luego escucharon sobre las posibilidades de un descubrimiento: un procedimiento complejo que invierte un interruptor genético con la finalidad de que el cuerpo produzca sangre sana.</p>
+        <div style="border-left:3px solid var(--w1);padding:10px 14px;background:rgba(28,63,140,.07);margin:14px 0;font-size:13px;font-style:italic">
+          <b>La pesadilla de una familia.</b> Los médicos les advirtieron a sus padres, <b>Sheila Cintrón</b> y <b>Byron Obando</b>, que si tenían otro hijo, las probabilidades de que tuviera la misma enfermedad eran de una en cuatro. Pero decidieron correr el riesgo. Helen nació menos de dos años después. Su tercer hijo, <b>Ryan Obando</b>, no heredó la anemia falciforme. Cuando Ryan tenía 9 años, los médicos sugirieron que, si era compatible con Helen, podría ayudarla dándole parte de su médula ósea. Resultó que Ryan no era compatible con Helen, pero sí con Haylee. El trasplante tuvo éxito.
+        </div>
+        <p style="font-size:13px;margin-bottom:0">La familia se enteró de que los médicos del Hospital de Niños de Boston estaban trabajando en una terapia génica con células falciformes. Cintron se comunicó con Erica Esrick, la investigadora principal de las pruebas. Pero esos ensayos aún no estaban disponibles para los niños.</p>
+        <p style="font-family:var(--font-m);font-size:10px;color:var(--w1);margin-top:12px;letter-spacing:.06em">— Continuará… (ver Semana 2, Actividad 4)</p>
+      </div>
+    </div>
+
+    <p>Lee la noticia anterior en grupos de cuatro integrantes y responde:</p>
+    <div class="callout note"><b>Notación:</b> S = alelo dominante (sin enfermedad) · s = alelo recesivo (con enfermedad). La anemia falciforme es autosómica recesiva: solo se manifiesta en individuos <b>ss</b>.</div>
+    <div class="sp questions">
+      <div class="q-block"><div class="q-label"><span class="qnum" style="background:var(--w1)">a</span><span class="qtext">La noticia relata la aplicación de una terapia génica. ¿En qué creen que consistirá el tratamiento?</span></div><textarea class="answer-lines" data-field="s1_1a" placeholder="Escribe tu respuesta aquí…"></textarea></div>
+      <div class="q-block"><div class="q-label"><span class="qnum" style="background:var(--w1)">b</span><span class="qtext">¿Qué genotipo creen que tienen Haylee, Helen y Ryan? Justifiquen.</span></div><textarea class="answer-lines lg" data-field="s1_1b" placeholder="Indica el genotipo de cada hermano con justificación…"></textarea></div>
+      <div class="q-block"><div class="q-label"><span class="qnum" style="background:var(--w1)">c</span><span class="qtext">¿Qué genotipo creen que tienen Byron (padre) y Sheila (madre)? Justifiquen.</span></div><textarea class="answer-lines" data-field="s1_1c" placeholder="Genotipo de cada progenitor y justificación…"></textarea></div>
+      <div class="q-block"><div class="q-label"><span class="qnum" style="background:var(--w1)">d</span><span class="qtext">¿Cómo tendrían que ser los genotipos de los padres para que no pueda nacer un hijo con la enfermedad?</span></div><textarea class="answer-lines" data-field="s1_1d" placeholder="Analiza las combinaciones posibles…"></textarea></div>
+    </div>
+    <div class="sec-divider" style="margin:24px 0 12px"><span class="sd-icon">🃏</span><h2 style="font-size:.95rem">Simulación con tarjetas — Cruce Sheila × Byron</h2></div>
+
+    <!-- ANEXO 2 — Tarjetas de simulación -->
+    <div style="border:2px solid rgba(28,63,140,.25);background:#EBF1FF;padding:16px 18px;margin-bottom:18px">
+      <div style="font-family:var(--font-m);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--w1);margin-bottom:12px;display:flex;align-items:center;gap:8px">
+        <span>📎 ANEXO 2</span><span style="opacity:.5">—</span><span>Tarjetas de simulación de meiosis y cruce genético</span>
+      </div>
+      <p style="font-size:13px;margin-bottom:12px">Cada tarjeta representa un <b>cromosoma con su alelo</b>. Recórtalas (o úsalas como referencia visual) para simular el cruce entre Sheila y Byron. Recuerda: antes de la meiosis, el ADN se duplica, por eso cada cromosoma tiene dos cromátidas.</p>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px">
+        <div style="border:2px dashed var(--w1);padding:12px 8px;text-align:center;background:#fff;border-radius:2px">
+          <div style="font-family:var(--font-d);font-size:1.6rem;color:var(--w1)">S</div>
+          <div style="width:4px;height:60px;background:var(--ink);margin:6px auto"></div>
+          <div style="font-family:var(--font-m);font-size:9px;letter-spacing:.08em;color:#888;text-transform:uppercase">Cromosoma</div>
+        </div>
+        <div style="border:2px dashed #6B1AC0;padding:12px 8px;text-align:center;background:#fff;border-radius:2px">
+          <div style="font-family:var(--font-d);font-size:1.6rem;color:#6B1AC0">s</div>
+          <div style="width:4px;height:60px;background:var(--ink);margin:6px auto"></div>
+          <div style="font-family:var(--font-m);font-size:9px;letter-spacing:.08em;color:#888;text-transform:uppercase">Cromosoma</div>
+        </div>
+        <div style="border:2px dashed var(--w1);padding:12px 8px;text-align:center;background:#fff;border-radius:2px">
+          <div style="font-family:var(--font-d);font-size:1.6rem;color:var(--w1)">S</div>
+          <div style="width:4px;height:60px;background:var(--ink);margin:6px auto"></div>
+          <div style="font-family:var(--font-m);font-size:9px;letter-spacing:.08em;color:#888;text-transform:uppercase">Gameta</div>
+        </div>
+        <div style="border:2px dashed #6B1AC0;padding:12px 8px;text-align:center;background:#fff;border-radius:2px">
+          <div style="font-family:var(--font-d);font-size:1.6rem;color:#6B1AC0">s</div>
+          <div style="width:4px;height:60px;background:var(--ink);margin:6px auto"></div>
+          <div style="font-family:var(--font-m);font-size:9px;letter-spacing:.08em;color:#888;text-transform:uppercase">Gameta</div>
+        </div>
+      </div>
+      <div style="font-family:var(--font-m);font-size:10px;color:rgba(28,63,140,.7);letter-spacing:.06em">💡 Cada progenitor heterocigota (Ss) produce dos tipos de gametas: una con <b>S</b> y una con <b>s</b>. Combínalas para obtener los 4 genotipos posibles de la descendencia.</div>
+    </div>
+    <div class="questions">
+      <div class="q-block"><div class="q-label"><span class="qnum" style="background:var(--w1)">1</span><span class="qtext">¿Qué genotipo deben tener Sheila y Byron para que dos hijos tengan la enfermedad y uno no?</span></div><textarea class="answer-lines sm" data-field="s1_2a" placeholder="Genotipo de cada progenitor…"></textarea></div>
+      <div class="q-block"><div class="q-label"><span class="qnum" style="background:var(--w1)">3</span><span class="qtext">¿Cuáles son los cuatro óvulos posibles que puede producir Sheila durante la meiosis?</span></div><textarea class="answer-lines sm" data-field="s1_2c" placeholder="Lista las 4 posibilidades…"></textarea></div>
+      <div class="q-block"><div class="q-label"><span class="qnum" style="background:var(--w1)">4</span><span class="qtext">¿Cuáles son los cuatro espermatozoides posibles que puede producir Byron?</span></div><textarea class="answer-lines sm" data-field="s1_2d" placeholder="Lista las 4 posibilidades…"></textarea></div>
+      <div class="q-block"><div class="q-label"><span class="qnum" style="background:var(--w1)">6</span><span class="qtext">¿Cuáles son los genotipos y fenotipos posibles de la descendencia?</span></div>
+        <table class="data-table"><thead><tr><th style="background:var(--w1)">Genotipo posible</th><th style="background:var(--w1)">Fenotipo</th></tr></thead><tbody>
+          <tr><td><input data-field="s1_t1_g1" placeholder="Ej: SS"></td><td><input data-field="s1_t1_f1" placeholder="Fenotipo…"></td></tr>
+          <tr><td><input data-field="s1_t1_g2" placeholder="Ej: Ss"></td><td><input data-field="s1_t1_f2" placeholder="Fenotipo…"></td></tr>
+          <tr><td><input data-field="s1_t1_g3" placeholder="Ej: ss"></td><td><input data-field="s1_t1_f3" placeholder="Fenotipo…"></td></tr>
+        </tbody></table>
+      </div>
+    </div>
+    <div class="act-footer">
+      <button class="save-btn" onclick="saveActivity('act1',this)">💾 GUARDAR ACTIVIDAD 1</button>
+      <button class="edit-btn" id="editBtn_act1" onclick="editActivity('act1')" style="display:none">✏️ EDITAR</button>
+      <span class="save-confirm" id="saveMsg_act1"></span>
+    </div>
+  </div>
+</div><div class="act-title-block" style="color:var(--w1);background:linear-gradient(90deg,#EBF1FF,transparent)"><h3>Cuadro de Punnett y Segunda Ley de Mendel</h3></div></div>
+  <div class="act-body">
+    <div class="callout info"><b>Conclusión por completar:</b> Al cruzar dos individuos heterocigotas (Ss × Ss), habrá un <input class="inline-fill" data-field="s1_p1" placeholder="__">% sin enfermedad y un <input class="inline-fill" data-field="s1_p2" placeholder="__">% con enfermedad.</div>
+    <div class="sp2"></div>
+    <h4 style="font-family:var(--font-d);font-size:1.1rem;color:var(--w1);letter-spacing:.04em;margin-bottom:8px">ALTERNATIVA A — SS × SS</h4>
+    <div class="punnett-wrap"><label>Cuadro de Punnett 2×2</label>
+      <div class="punnett p2">
+        <div class="cell empty-hdr"></div><div class="cell hdr">S</div><div class="cell hdr">S</div>
+        <div class="cell hdr">S</div><div class="cell ans"><input class="punnett-input" data-field="s1_pA1" placeholder="…"></div><div class="cell ans"><input class="punnett-input" data-field="s1_pA2" placeholder="…"></div>
+        <div class="cell hdr">S</div><div class="cell ans"><input class="punnett-input" data-field="s1_pA3" placeholder="…"></div><div class="cell ans"><input class="punnett-input" data-field="s1_pA4" placeholder="…"></div>
+      </div>
+    </div>
+    <div class="sp2"></div>
+    <h4 style="font-family:var(--font-d);font-size:1.1rem;color:var(--w1);letter-spacing:.04em;margin-bottom:8px">ALTERNATIVA B — SS × ss (resuélvelo tú)</h4>
+    <div class="punnett-wrap"><label>Cuadro de Punnett 2×2</label>
+      <div class="punnett p2">
+        <div class="cell empty-hdr"></div><div class="cell hdr"><input class="punnett-input" data-field="s1_pB_h1" placeholder="?"></div><div class="cell hdr"><input class="punnett-input" data-field="s1_pB_h2" placeholder="?"></div>
+        <div class="cell hdr"><input class="punnett-input" data-field="s1_pB_v1" placeholder="?"></div><div class="cell ans"><input class="punnett-input" data-field="s1_pB1" placeholder="…"></div><div class="cell ans"><input class="punnett-input" data-field="s1_pB2" placeholder="…"></div>
+        <div class="cell hdr"><input class="punnett-input" data-field="s1_pB_v2" placeholder="?"></div><div class="cell ans"><input class="punnett-input" data-field="s1_pB3" placeholder="…"></div><div class="cell ans"><input class="punnett-input" data-field="s1_pB4" placeholder="…"></div>
+      </div>
+    </div>
+    <div class="sp questions"><div class="q-block"><div class="q-label"><span class="qnum" style="background:var(--w1)">→</span><span class="qtext">¿Por qué en la Alternativa B ningún hijo padece la enfermedad aunque uno de los padres sí la padece?</span></div><textarea class="answer-lines" data-field="s1_3" placeholder="Explica con base en la dominancia y la Ley de Mendel…"></textarea></div></div>
+    <div class="act-footer">
+      <button class="save-btn" onclick="saveActivity('act2',this)">💾 GUARDAR ACTIVIDAD 2</button>
+      <button class="edit-btn" id="editBtn_act2" onclick="editActivity('act2')" style="display:none">✏️ EDITAR</button>
+      <span class="save-confirm" id="saveMsg_act2"></span>
+    </div>
+  </div>
+</div>
+</div><!-- /sec-semana1 -->
+
+<!-- ══ SEMANA 2 ══ -->
+<div id="sec-semana2">
+<div class="week-locked-notice" id="lock-semana2"><p>🔒 SEMANA 2 NO DISPONIBLE AÚN — Tu docente activará esta semana próximamente.</p></div>
+<div id="content-semana2">
+<div class="week-header wh2"><div class="num-bg"><span>2</span></div><span class="wlabel">Semana 2</span><h2 class="wtitle" id="semana2">DEL GEN A LA PROTEÍNA:<br>SÍNTESIS PROTEICA</h2><p class="wsubtitle">Transcripción, traducción, código genético y expresión génica</p></div>
+<div class="act-card">
+  <div class="act-header"><div class="act-num" style="background:var(--w2)">3<span class="act-label">ACT</span></div><div class="act-title-block" style="color:var(--w2);background:linear-gradient(90deg,#E4F5F2,transparent)"><h3>ADN, ARN y síntesis de proteínas</h3></div></div>
+  <div class="act-body">
+    <div class="questions">
+      <div class="q-block"><div class="q-label"><span class="qnum" style="background:var(--w2)">1</span><span class="qtext">¿Cuál crees que es la causa de la producción de hemoglobina defectuosa en la anemia falciforme?</span></div><textarea class="answer-lines" data-field="s2_1" placeholder="Reflexiona sobre el origen molecular…"></textarea></div>
+    </div>
+    <div class="sec-divider" style="margin:22px 0 10px"><span class="sd-icon">🔁</span><h2 style="font-size:.95rem">Transcripción — Del ADN al ARNm</h2></div>
+    <div class="callout dna"><b>Cadena molde de ADN (5' → 3'):</b><br>T — A — C — T — T — T — T — C — A — A — T — T</div>
+    <div class="callout note"><b>Reglas:</b> A-U · T-A · G-C · C-G (Timina → Uracilo en ARN).</div>
+    <div class="q-block sp"><div class="q-label"><span class="qnum" style="background:var(--w2)">→</span><span class="qtext">Escribe la secuencia del ARNm complementario:</span></div><textarea class="answer-lines sm" data-field="s2_arnm" placeholder="Ej: AUG — AAA — …"></textarea></div>
+    <div class="sec-divider" style="margin:22px 0 10px"><span class="sd-icon">🔀</span><h2 style="font-size:.95rem">Traducción — Del ARNm a la proteína</h2></div>
+
+    <!-- ANEXO 3 — Tabla código genético + materiales de simulación -->
+    <div style="border:2px solid rgba(14,107,94,.3);background:#E4F5F2;padding:16px 18px;margin-bottom:18px">
+      <div style="font-family:var(--font-m);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--w2);margin-bottom:12px">📎 ANEXO 3 — Tabla del Código Genético + Materiales de simulación de la Traducción</div>
+
+      <!-- Genetic code table -->
+      <p style="font-size:12px;margin-bottom:10px;font-style:italic">La tabla muestra los 64 tripletes (codones) posibles de combinar los ribonucleótidos U, C, A y G. <b>Phe</b>=Fenilalanina, <b>Leu</b>=Leucina, <b>Ile</b>=Isoleucina, <b>Met</b>=Metionina, <b>Val</b>=Valina, <b>Ser</b>=Serina, <b>Pro</b>=Prolina, <b>Thr</b>=Treonina, <b>Ala</b>=Alanina, <b>Tyr</b>=Tirosina, <b>His</b>=Histidina, <b>Gln</b>=Glutamina, <b>Asn</b>=Asparagina, <b>Lys</b>=Lisina, <b>Asp</b>=Aspártico, <b>Glu</b>=Glutámico, <b>Cys</b>=Cisteína, <b>Arg</b>=Arginina, <b>Gly</b>=Glicina. <b>STOP</b>=codón de parada.</p>
+
+      <div style="overflow-x:auto;margin-bottom:16px">
+      <table style="border-collapse:collapse;font-family:var(--font-m);font-size:10px;width:100%;min-width:520px">
+        <thead>
+          <tr>
+            <th style="background:var(--w2);color:#fff;padding:5px 8px;border:1px solid rgba(14,107,94,.3);text-align:center">1ª Letra</th>
+            <th colspan="8" style="background:var(--w2);color:#fff;padding:5px 8px;border:1px solid rgba(14,107,94,.3);text-align:center">2ª LETRA DEL CODÓN</th>
+            <th style="background:var(--w2);color:#fff;padding:5px 8px;border:1px solid rgba(14,107,94,.3);text-align:center">3ª</th>
+          </tr>
+          <tr>
+            <th style="background:#D4EDE9;padding:4px 8px;border:1px solid rgba(14,107,94,.2)"></th>
+            <th colspan="2" style="background:#D4EDE9;padding:4px 8px;border:1px solid rgba(14,107,94,.2);text-align:center">U</th>
+            <th colspan="2" style="background:#D4EDE9;padding:4px 8px;border:1px solid rgba(14,107,94,.2);text-align:center">C</th>
+            <th colspan="2" style="background:#D4EDE9;padding:4px 8px;border:1px solid rgba(14,107,94,.2);text-align:center">A</th>
+            <th colspan="2" style="background:#D4EDE9;padding:4px 8px;border:1px solid rgba(14,107,94,.2);text-align:center">G</th>
+            <th style="background:#D4EDE9;padding:4px 8px;border:1px solid rgba(14,107,94,.2)"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td rowspan="4" style="background:#c8e6c9;text-align:center;font-weight:700;padding:4px 6px;border:1px solid rgba(14,107,94,.2)">U</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">UUU</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Phe</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">UCU</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Ser</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">UAU</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w4);font-weight:700">Tyr</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">UGU</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Cys</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);text-align:center">U</td></tr>
+          <tr><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">UUC</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Phe</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">UCC</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Ser</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">UAC</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w4);font-weight:700">Tyr</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">UGC</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Cys</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);text-align:center">C</td></tr>
+          <tr><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">UUA</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Leu</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">UCA</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Ser</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">UAA</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--danger);font-weight:700">STOP</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">UGA</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--danger);font-weight:700">STOP</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);text-align:center">A</td></tr>
+          <tr><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">UUG</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Leu</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">UCG</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Ser</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">UAG</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--danger);font-weight:700">STOP</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">UGG</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Trp</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);text-align:center">G</td></tr>
+          <tr><td rowspan="4" style="background:#c8e6c9;text-align:center;font-weight:700;padding:4px 6px;border:1px solid rgba(14,107,94,.2)">C</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">CUU</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Leu</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">CCU</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Pro</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">CAU</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w4);font-weight:700">His</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">CGU</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Arg</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);text-align:center">U</td></tr>
+          <tr><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">CUC</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Leu</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">CCC</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Pro</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">CAC</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w4);font-weight:700">His</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">CGC</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Arg</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);text-align:center">C</td></tr>
+          <tr><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">CUA</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Leu</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">CCA</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Pro</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">CAA</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Gln</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">CGA</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Arg</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);text-align:center">A</td></tr>
+          <tr><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">CUG</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Leu</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">CCG</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Pro</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">CAG</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Gln</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">CGG</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Arg</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);text-align:center">G</td></tr>
+          <tr><td rowspan="4" style="background:#c8e6c9;text-align:center;font-weight:700;padding:4px 6px;border:1px solid rgba(14,107,94,.2)">A</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">AUU</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Ile</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">ACU</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Thr</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">AAU</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Asn</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">AGU</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Ser</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);text-align:center">U</td></tr>
+          <tr><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">AUC</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Ile</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">ACC</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Thr</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">AAC</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Asn</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">AGC</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Ser</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);text-align:center">C</td></tr>
+          <tr><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">AUA</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Ile</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">ACA</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Thr</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">AAA</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w4);font-weight:700">Lys</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">AGA</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Arg</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);text-align:center">A</td></tr>
+          <tr><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);background:#b2dfdb">AUG</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w3);font-weight:700;background:#b2dfdb">Met ▶START</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">ACG</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Thr</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">AAG</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w4);font-weight:700">Lys</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">AGG</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Arg</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);text-align:center">G</td></tr>
+          <tr><td rowspan="4" style="background:#c8e6c9;text-align:center;font-weight:700;padding:4px 6px;border:1px solid rgba(14,107,94,.2)">G</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">GUU</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Val</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">GCU</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Ala</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">GAU</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w4);font-weight:700">Asp</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">GGU</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Gly</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);text-align:center">U</td></tr>
+          <tr><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">GUC</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Val</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">GCC</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Ala</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">GAC</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w4);font-weight:700">Asp</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">GGC</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Gly</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);text-align:center">C</td></tr>
+          <tr><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">GUA</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Val</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">GCA</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Ala</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">GAA</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Glu</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">GGA</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Gly</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);text-align:center">A</td></tr>
+          <tr><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">GUG</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Val</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">GCG</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Ala</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">GAG</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Glu</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15)">GGG</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);color:var(--w2);font-weight:700">Gly</td><td style="padding:3px 6px;border:1px solid rgba(14,107,94,.15);text-align:center">G</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <!-- Translation simulation materials -->
+      <div style="border-top:1px solid rgba(14,107,94,.2);padding-top:14px;margin-top:4px">
+        <div style="font-family:var(--font-m);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--w2);margin-bottom:10px">🔬 Simulación de la Traducción — Materiales de referencia</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px">
+          <div style="background:#fff;border:1.5px solid rgba(14,107,94,.3);padding:12px;text-align:center">
+            <div style="font-size:1.6rem;margin-bottom:4px">🧬</div>
+            <div style="font-family:var(--font-d);font-size:.85rem;letter-spacing:.06em;color:var(--w2)">RIBOSOMA</div>
+            <div style="font-family:var(--font-m);font-size:9px;color:#666;margin-top:4px">Tiene 2 sitios para ARNt. El ARNm pasa por el ribosoma mientras se une al anticodón complementario.</div>
+          </div>
+          <div style="background:#fff;border:1.5px solid rgba(14,107,94,.3);padding:12px;text-align:center">
+            <div style="font-size:1.6rem;margin-bottom:4px">🔄</div>
+            <div style="font-family:var(--font-d);font-size:.85rem;letter-spacing:.06em;color:var(--w2)">ARNt</div>
+            <div style="font-family:var(--font-m);font-size:9px;color:#666;margin-top:4px">Cada ARNt lleva un aminoácido en un extremo y el anticodón en el otro. El anticodón es complementario al codón del ARNm.</div>
+          </div>
+          <div style="background:#fff;border:1.5px solid rgba(14,107,94,.3);padding:12px;text-align:center">
+            <div style="font-size:1.6rem;margin-bottom:4px">⚪</div>
+            <div style="font-family:var(--font-d);font-size:.85rem;letter-spacing:.06em;color:var(--w2)">AMINOÁCIDOS</div>
+            <div style="font-family:var(--font-m);font-size:9px;color:#666;margin-top:4px">Se unen en cadena formando el polipéptido. El orden depende del orden de los codones del ARNm.</div>
+          </div>
+        </div>
+        <div style="background:#fff;border:1.5px dashed rgba(14,107,94,.3);padding:10px;font-family:var(--font-m);font-size:10px;color:var(--w2)">
+          <b>Pasos de la simulación:</b> (a) Escribe la secuencia del ARNm. (b) Ubica el ARNm en el ribosoma. (c) Para cada codón: busca el ARNt con el anticodón complementario y escribe el aminoácido. (d) Une los aminoácidos al polipéptido en construcción. (e) Avanza hasta el codón STOP.
+        </div>
+      </div>
+    </div>
+    <table class="data-table"><thead><tr><th style="background:var(--w2)">Codón ADN</th><th style="background:var(--w2)">Codón ARNm</th><th style="background:var(--w2)">Anticodón ARNt</th><th style="background:var(--w2)">Aminoácido</th></tr></thead><tbody>
+      <tr><td><input data-field="s2_t1_c1" placeholder="…"></td><td><input data-field="s2_t1_m1" placeholder="…"></td><td><input data-field="s2_t1_a1" placeholder="…"></td><td><input data-field="s2_t1_aa1" placeholder="…"></td></tr>
+      <tr><td><input data-field="s2_t1_c2" placeholder="…"></td><td><input data-field="s2_t1_m2" placeholder="…"></td><td><input data-field="s2_t1_a2" placeholder="…"></td><td><input data-field="s2_t1_aa2" placeholder="…"></td></tr>
+      <tr><td><input data-field="s2_t1_c3" placeholder="…"></td><td><input data-field="s2_t1_m3" placeholder="…"></td><td><input data-field="s2_t1_a3" placeholder="…"></td><td><input data-field="s2_t1_aa3" placeholder="…"></td></tr>
+      <tr><td><input data-field="s2_t1_c4" placeholder="…"></td><td><input data-field="s2_t1_m4" placeholder="…"></td><td><input data-field="s2_t1_a4" placeholder="…"></td><td><input data-field="s2_t1_aa4" placeholder="…"></td></tr>
+    </tbody></table>
+    <div class="questions sp">
+      <div class="q-block"><div class="q-label"><span class="qnum" style="background:var(--w2)">2</span><span class="qtext">¿Cómo afecta una mutación puntual al resultado final de la proteína?</span></div><textarea class="answer-lines" data-field="s2_2" placeholder="Explica la relación entre mutación y fenotipo…"></textarea></div>
+      <div class="q-block"><div class="q-label"><span class="qnum" style="background:var(--w2)">3</span><span class="qtext">¿Qué diferencia hay entre el ARNm normal y el de la anemia falciforme?</span></div><textarea class="answer-lines" data-field="s2_3" placeholder="Compara las secuencias y sus consecuencias…"></textarea></div>
+    </div>
+  </div>
+</div>
+
+<!-- ACT 4 — Expresión génica + Terapia génica -->
+<div class="act-card">
+  <div class="act-header"><div class="act-num" style="background:var(--w2)">4<span class="act-label">ACT</span></div><div class="act-title-block" style="color:var(--w2);background:linear-gradient(90deg,#E4F5F2,transparent)"><h3>Expresión génica, simulador PHET y terapia génica</h3></div></div>
+  <div class="act-body">
+
+    <!-- ANEXO 4 — PHET Simulator Activity -->
+    <div style="border:2px solid rgba(14,107,94,.3);background:#E4F5F2;padding:16px 18px;margin-bottom:20px">
+      <div style="font-family:var(--font-m);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--w2);margin-bottom:10px">📎 ANEXO 4 — Simulador PHET: Expresión Génica</div>
+      <p style="font-size:13px;margin-bottom:10px">Usando el <b>simulador PHET Expresión Génica</b> (ventana &lt;Expresión&gt;), analizarás el efecto de diferentes biomoléculas en la transcripción y traducción de un gen.</p>
+
+      <div style="background:#fff;border:1.5px solid rgba(14,107,94,.25);padding:14px;margin-bottom:12px">
+        <div style="font-family:var(--font-d);font-size:.9rem;letter-spacing:.06em;color:var(--w2);margin-bottom:8px">ACTIVIDAD A — Gen 1</div>
+        <div class="questions">
+          <div class="q-block"><div class="q-label"><span class="qnum" style="background:var(--w2)">1</span><span class="qtext">¿Cuáles biomoléculas crees que son necesarias para transcribir el Gen 1?</span></div><textarea class="answer-lines sm" data-field="s2_phet_A1" placeholder="Menciona las biomoléculas…"></textarea></div>
+          <div class="q-block"><div class="q-label"><span class="qnum" style="background:var(--w2)">3</span><span class="qtext">Pruébalo en el simulador. ¿Coincide con tu respuesta? ¿Qué biomoléculas son necesarias?</span></div><textarea class="answer-lines sm" data-field="s2_phet_A3" placeholder="Describe lo que observaste…"></textarea></div>
+        </div>
+      </div>
+
+      <div style="background:#fff;border:1.5px solid rgba(14,107,94,.25);padding:14px;margin-bottom:12px">
+        <div style="font-family:var(--font-d);font-size:.9rem;letter-spacing:.06em;color:var(--w2);margin-bottom:8px">ACTIVIDAD B — Gen 2 (condiciones de transcripción)</div>
+        <p style="font-size:12px;margin-bottom:10px;font-style:italic">Analiza 7 condiciones distintas de FTP/FTN/ARN Polimerasa. Predice si habrá transcripción y luego comprueba en el simulador.</p>
+        <table class="data-table"><thead><tr><th style="background:var(--w2)">Condición</th><th style="background:var(--w2)">¿FTP?</th><th style="background:var(--w2)">¿FTN?</th><th style="background:var(--w2)">Mi predicción</th><th style="background:var(--w2)">Resultado real</th></tr></thead><tbody>
+          <tr><td style="font-family:var(--font-m);font-weight:700">A</td><td><input data-field="s2_b_ftp_A" placeholder="…"></td><td><input data-field="s2_b_ftn_A" placeholder="…"></td><td><input data-field="s2_b_pred_A" placeholder="Sí/No"></td><td><input data-field="s2_b_real_A" placeholder="Sí/No"></td></tr>
+          <tr><td style="font-family:var(--font-m);font-weight:700">C</td><td><input data-field="s2_b_ftp_C" placeholder="…"></td><td><input data-field="s2_b_ftn_C" placeholder="…"></td><td><input data-field="s2_b_pred_C" placeholder="Sí/No"></td><td><input data-field="s2_b_real_C" placeholder="Sí/No"></td></tr>
+          <tr><td style="font-family:var(--font-m);font-weight:700">D</td><td><input data-field="s2_b_ftp_D" placeholder="…"></td><td><input data-field="s2_b_ftn_D" placeholder="…"></td><td><input data-field="s2_b_pred_D" placeholder="Sí/No"></td><td><input data-field="s2_b_real_D" placeholder="Sí/No"></td></tr>
+          <tr><td style="font-family:var(--font-m);font-weight:700">G</td><td><input data-field="s2_b_ftp_G" placeholder="…"></td><td><input data-field="s2_b_ftn_G" placeholder="…"></td><td><input data-field="s2_b_pred_G" placeholder="Sí/No"></td><td><input data-field="s2_b_real_G" placeholder="Sí/No"></td></tr>
+        </tbody></table>
+        <div class="questions sp">
+          <div class="q-block"><div class="q-label"><span class="qnum" style="background:var(--w2)">4a</span><span class="qtext">¿Cuál es la función del Factor de Transcripción Positivo (FTP)?</span></div><textarea class="answer-lines sm" data-field="s2_phet_B4a" placeholder="Explica su rol en la transcripción…"></textarea></div>
+          <div class="q-block"><div class="q-label"><span class="qnum" style="background:var(--w2)">4b</span><span class="qtext">¿Cuál es la función del Factor de Transcripción Negativo (FTN)?</span></div><textarea class="answer-lines sm" data-field="s2_phet_B4b" placeholder="Explica su rol bloqueante…"></textarea></div>
+        </div>
+      </div>
+
+      <div style="background:#fff;border:1.5px solid rgba(14,107,94,.25);padding:14px">
+        <div style="font-family:var(--font-d);font-size:.9rem;letter-spacing:.06em;color:var(--w2);margin-bottom:8px">ACTIVIDAD C — Síntesis completa + Destructor de ARNm</div>
+        <div class="questions">
+          <div class="q-block"><div class="q-label"><span class="qnum" style="background:var(--w2)">→</span><span class="qtext">Usa el Gen 3 y fabrica 3 proteínas. Luego coloca el Factor de Transcripción Negativo y usa el Destructor de ARNm. ¿Qué sucede? ¿Por qué el ARNm es destruido?</span></div><textarea class="answer-lines lg" data-field="s2_phet_C" placeholder="Describe el proceso y su importancia biológica…"></textarea></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ANEXO 5 — Continuación noticia + Terapia génica -->
+    <div style="border:2px solid rgba(14,107,94,.4);background:#E4F5F2;padding:16px 18px;margin-bottom:18px">
+      <div style="font-family:var(--font-m);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--w2);margin-bottom:12px">📰 ANEXO 5 — Continuación: Helen Obando y la Terapia Génica</div>
+      <h4 style="font-family:var(--font-s);font-size:1rem;font-weight:700;color:var(--w2);margin-bottom:10px">La investigación científica</h4>
+      <p style="font-size:13px;margin-bottom:9px">Se sabía que, al menos en teoría, existía una solución: los fetos producen hemoglobina a partir de un <b>gen diferente</b>. Las células sanguíneas con hemoglobina fetal no se deforman. Pero el gen fetal se apaga después del nacimiento, y lo sustituye el gen adulto de la hemoglobina. Si el gen adulto tiene la mutación, los glóbulos rojos se vuelven falciformes.</p>
+      <p style="font-size:13px;margin-bottom:9px">Los investigadores descubrieron una pista prometedora: un gen llamado <b>BCL11A</b>. Al inhibirlo en experimentos, las células sanguíneas empezaban a producir hemoglobina fetal en lugar de adulta.</p>
+      <p style="font-size:13px;margin-bottom:9px">En 2018, trabajaron con pacientes en el Hospital de Niños de Boston. Los médicos liberaron células madre de la médula ósea, usaron un <b>virus diseñado genéticamente</b> para llevar información a las células madre, invirtiendo el gen de la hemoglobina fetal y desactivando el gen adulto. Luego inyectaron las células madre modificadas por vía intravenosa.</p>
+      <div style="border-left:3px solid var(--w2);padding:10px 14px;background:rgba(14,107,94,.07);font-size:13px;font-style:italic;margin:12px 0">Los síntomas de Helen desaparecieron en los meses posteriores a la aplicación de la terapia génica. Su nivel total de hemoglobina alcanzó prácticamente niveles normales, lo que nunca había experimentado ni siquiera con transfusiones de sangre.</div>
+      <p style="font-family:var(--font-m);font-size:10px;color:rgba(14,107,94,.6);letter-spacing:.06em">Video sugerido: "¿Cómo esta enfermedad cambia la forma de tus células?" — TED-Ed (subtítulos en español)</p>
+    </div>
+
+    <div class="questions">
+      <div class="q-block"><div class="q-label"><span class="qnum" style="background:var(--w2)">a</span><span class="qtext">¿Cuáles son los últimos avances científicos en el tratamiento de la anemia falciforme? Redacta un texto explicativo.</span></div><textarea class="answer-lines lg" data-field="s2_avances" placeholder="Explica los avances de la terapia génica con BCL11A…"></textarea></div>
+      <div class="q-block"><div class="q-label"><span class="qnum" style="background:var(--w2)">b</span><span class="qtext">¿Por qué el trabajo con el simulador PHET sobre factores de transcripción se relaciona con el tratamiento de la anemia falciforme?</span></div><textarea class="answer-lines" data-field="s2_relacion_phet" placeholder="Conecta la regulación génica con la terapia génica…"></textarea></div>
+    </div>
+    <div class="act-footer">
+      <button class="save-btn" onclick="saveActivity('act34',this)">💾 GUARDAR ACTIVIDADES 3 Y 4</button>
+      <button class="edit-btn" id="editBtn_act34" onclick="editActivity('act34')" style="display:none">✏️ EDITAR</button>
+      <span class="save-confirm" id="saveMsg_act34"></span>
+    </div>
+  </div>
+</div>
+</div>
+</div><!-- /sec-semana2 -->
+
+<!-- ══ SEMANA 3 ══ -->
+<div id="sec-semana3">
+<div class="week-locked-notice" id="lock-semana3"><p>🔒 SEMANA 3 NO DISPONIBLE AÚN — Tu docente activará esta semana próximamente.</p></div>
+<div id="content-semana3">
+<div class="week-header wh3"><div class="num-bg"><span>3</span></div><span class="wlabel">Semana 3</span><h2 class="wtitle" id="semana3">EPIGENÉTICA:<br>EL AMBIENTE Y LOS GENES</h2><p class="wsubtitle">Metilación, histonas, y la herencia más allá del ADN</p></div>
+<div class="act-card">
+  <div class="act-header"><div class="act-num" style="background:var(--w3)">5<span class="act-label">ACT</span></div><div class="act-title-block" style="color:var(--w3);background:linear-gradient(90deg,#FEF3E4,transparent)"><h3>El caso de Ángel — Epigenética en acción</h3></div></div>
+  <div class="act-body">
+    <div class="callout note">Lee el siguiente caso de los gemelos Ángel y Ramona para responder las preguntas.</div>
+
+    <!-- CASO EPIGENÉTICA — Ángel y Ramona (del documento original) -->
+    <div style="border:2px solid rgba(184,74,12,.3);background:#FEF3E4;padding:16px 18px;margin:14px 0">
+      <div style="font-family:var(--font-m);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--w3);margin-bottom:10px">📎 CASO — Ángel y Ramona: gemelos idénticos, epigenomas distintos</div>
+      <p style="font-size:13px;margin-bottom:9px">Ángel y Ramona son gemelos idénticos: comparten la misma secuencia de ADN. Tras nacer, su familia atraviesa una mudanza que separa las rutinas de los bebés durante sus primeros dos años.</p>
+      <p style="font-size:13px;margin-bottom:9px"><b>Ángel</b> pasa largas horas en casa de su abuelo, fumador, y su pediatra indica tratamientos con corticoides inhalados por episodios frecuentes de broncoespasmo. Además, su alimentación incluye con frecuencia ultra procesados y bebidas azucaradas.</p>
+      <p style="font-size:13px;margin-bottom:9px"><b>Ramona</b>, en cambio, asiste a un centro con lactancia prolongada, menús caseros ricos en verduras de hoja (fuentes de ácido fólico) y juego al aire libre todos los días.</p>
+      <p style="font-size:13px;margin-bottom:0">A los 12 años, los estudios muestran diferencias: Ángel tiene mayor adiposidad y perfiles inflamatorios elevados; Ramona presenta peso y metabolismo dentro de parámetros saludables. El equipo médico sospecha que se están <b>«apagando» y «encendiendo» genes de forma diferente</b> en cada uno.</p>
+    </div>
+
+    <!-- Ratones Agutí experiment -->
+    <div style="border:2px solid rgba(184,74,12,.2);background:#FEF3E4;padding:14px 18px;margin:14px 0">
+      <div style="font-family:var(--font-m);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--w3);margin-bottom:10px">🐭 EXPERIMENTO — Ratones Agutí y metilación del ADN</div>
+      <p style="font-size:13px;margin-bottom:8px">Los ratones poseen un gen llamado <b>Agutí</b>. Cuando no hay grupos metilo marcando el gen Agutí, el pelaje es amarillo y los ratones presentan obesidad y predisposición a la diabetes y el cáncer. Cuando hay grupos metilo marcando el gen Agutí, el color del pelaje es marrón y los ratones tienen peso adecuado y bajo riesgo de enfermedades.</p>
+      <p style="font-size:13px;margin-bottom:8px">En un experimento, los investigadores alimentaron a ratones hembra preñadas de color amarillo: al <b>Grupo A</b> con una dieta rica en vitamina B12, y al <b>Grupo B</b> con una dieta sin vitamina B12.</p>
+      <div class="callout mission" style="margin:0;font-size:13px">¿Cuál de los ratones de la imagen es descendiente del Grupo A y cuál del Grupo B? Un ratón es de color marrón/delgado y el otro de color amarillo/obeso. Justifica usando epigenética.</div>
+    </div>
+    <div class="questions sp">
+      <div class="q-block"><div class="q-label"><span class="qnum" style="background:var(--w3)">1</span><span class="qtext">¿Qué factores del entorno de Ángel podrían estar modificando su epigenoma?</span></div>
+        <table class="data-table"><thead><tr><th style="background:var(--w3)">Factores negativos</th><th style="background:var(--w3)">Factores positivos</th></tr></thead><tbody><tr>
+          <td><textarea data-field="s3_neg" style="min-height:90px;border:none;width:100%;font-family:var(--font-s);font-size:13px;outline:none;resize:none;background:transparent" placeholder="Factores negativos…"></textarea></td>
+          <td><textarea data-field="s3_pos" style="min-height:90px;border:none;width:100%;font-family:var(--font-s);font-size:13px;outline:none;resize:none;background:transparent" placeholder="Factores positivos…"></textarea></td>
+        </tr></tbody></table>
+      </div>
+      <div class="q-block"><div class="q-label"><span class="qnum" style="background:var(--w3)">2</span><span class="qtext">¿Dónde se colocan las etiquetas epigenéticas?</span></div><textarea class="answer-lines sm" data-field="s3_2" placeholder="Menciona las estructuras moleculares implicadas…"></textarea></div>
+      <div class="q-block"><div class="q-label"><span class="qnum" style="background:var(--w3)">3</span><span class="qtext">¿Son reversibles los cambios epigenéticos? Propone dos cambios de hábitos:</span></div><textarea class="answer-lines" data-field="s3_3" placeholder="Analiza la reversibilidad y propone cambios concretos…"></textarea></div>
+      <div class="q-block"><div class="q-label"><span class="qnum" style="background:var(--w3)">4</span><span class="qtext">¿Por qué este caso no contradice la genética mendeliana?</span></div><textarea class="answer-lines" data-field="s3_4" placeholder="Explica la relación entre epigenética y genética clásica…"></textarea></div>
+    </div>
+    <div class="act-footer">
+      <button class="save-btn" onclick="saveActivity('act5',this)">💾 GUARDAR ACTIVIDAD 5</button>
+      <button class="edit-btn" id="editBtn_act5" onclick="editActivity('act5')" style="display:none">✏️ EDITAR</button>
+      <span class="save-confirm" id="saveMsg_act5"></span>
+    </div>
+  </div>
+</div>
+</div>
+</div><!-- /sec-semana3 -->
+
+<!-- ══ SEMANA 4 ══ -->
+<div id="sec-semana4">
+<div class="week-locked-notice" id="lock-semana4"><p>🔒 SEMANA 4 NO DISPONIBLE AÚN — Tu docente activará esta semana próximamente.</p></div>
+<div id="content-semana4">
+<div class="week-header wh4"><div class="num-bg"><span>4</span></div><span class="wlabel">Semana 4</span><h2 class="wtitle" id="semana4">GRUPOS SANGUÍNEOS<br>Y HERENCIA DIHÍBRIDA</h2><p class="wsubtitle">Los 8 grupos sanguíneos · Cruce dihíbrido · Tercera Ley de Mendel</p></div>
+<div class="act-card">
+  <div class="act-header"><div class="act-num" style="background:var(--w4)">6<span class="act-label">ACT</span></div><div class="act-title-block" style="color:var(--w4);background:linear-gradient(90deg,#F0EAFA,transparent)"><h3>Historia de la transfusión sanguínea y grupos ABO</h3></div></div>
+  <div class="act-body">
+
+    <!-- ANEXO 6 — Breve historia de la transfusión sanguínea -->
+    <div style="border:2px solid rgba(92,26,138,.3);background:#F0EAFA;padding:16px 18px;margin-bottom:20px">
+      <div style="font-family:var(--font-m);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--w4);margin-bottom:12px">📎 ANEXO 6 — Breve historia de la transfusión sanguínea</div>
+      <p style="font-family:var(--font-m);font-size:9px;color:rgba(92,26,138,.5);margin-bottom:12px;letter-spacing:.06em">Adaptado de Guillermo Murillo-Godínez. Rev Hematol Mex 2019;20(1):1-3.</p>
+      <p style="font-size:13px;margin-bottom:9px">En febrero de 1665, Richard Lower y Edmund King practicaron la transfusión entre perros. La primera transfusión de sangre de un cordero a un humano fue realizada en 1667, por Juan Bautista Denis y Paul Emmerets; el procedimiento se efectuó en un enfermo de 15 años, quien «se volvió loco algunos días después» y murió en una segunda transfusión.</p>
+      <p style="font-size:13px;margin-bottom:9px">Meses después, Denis le aplicó dos transfusiones a Antoine Mauroy. Durante la segunda transfusión su brazo se calentó, su pulso se aceleró, el sudor brotó sobre su frente, se quejaba de fuertes dolores en los riñones y en el estómago. Afortunadamente Mauroy sobrevivió en esa ocasión y «recobró su buen sentido». Sin embargo, Mauroy murió en una tercera transfusión. Aunque se demostró que su esposa lo había envenenado con arsénico, el escándalo llevó a la Facultad de Medicina de París a prohibir las transfusiones en 1668, calificándolas de «método monstruoso».</p>
+      <p style="font-size:13px;margin-bottom:9px">La primera transfusión de humano a humano la realizó <b>James Blundell en 1818</b>, aunque aún persistían problemas de coagulación y compatibilidad. El gran avance llegó cuando en <b>1901, Karl Landsteiner</b> describió los grupos sanguíneos A, B y O, haciendo posible la transfusión segura entre personas compatibles y demostrando que la incompatibilidad de los grupos causaba las muertes. El descubrimiento del <b>factor Rh en 1940</b> completó el sistema ABO y fue crucial para evitar reacciones adversas.</p>
+    </div>
+
+    <p>Lee la "Breve historia de la transfusión sanguínea" y responde:</p>
+    <div class="sp questions">
+      <div class="q-block"><div class="q-label"><span class="qnum" style="background:var(--w4)">a</span><span class="qtext">¿Por qué crees que las primeras transfusiones se probaban entre animales?</span></div><textarea class="answer-lines sm" data-field="s4_a" placeholder="Reflexiona sobre el contexto histórico…"></textarea></div>
+      <div class="q-block"><div class="q-label"><span class="qnum" style="background:var(--w4)">b</span><span class="qtext">¿Qué sucedió en las transfusiones entre humanos?</span></div><textarea class="answer-lines sm" data-field="s4_b" placeholder="Describe los problemas de compatibilidad…"></textarea></div>
+      <div class="q-block"><div class="q-label"><span class="qnum" style="background:var(--w4)">c</span><span class="qtext">¿Qué tipo y factor de sangre tienes? ¿Cuáles puedes recibir?</span></div><textarea class="answer-lines" data-field="s4_c" placeholder="Aplica el conocimiento de compatibilidad sanguínea…"></textarea></div>
+    </div>
+    <div class="sec-divider" style="margin:22px 0 10px"><span class="sd-icon">🩸</span><h2 style="font-size:.95rem">Tabla de genotipos ABO</h2></div>
+    <table class="data-table"><thead><tr><th style="background:var(--w4)">Grupo</th><th style="background:var(--w4)">Genotipo(s)</th><th style="background:var(--w4)">Antígenos</th><th style="background:var(--w4)">Dona a / Recibe de</th></tr></thead><tbody>
+      <tr><td style="text-align:center;font-family:var(--font-m);font-weight:700">A</td><td><input data-field="s4_t_gA" placeholder="…"></td><td><input data-field="s4_t_agA" placeholder="…"></td><td><input data-field="s4_t_dA" placeholder="…"></td></tr>
+      <tr><td style="text-align:center;font-family:var(--font-m);font-weight:700">B</td><td><input data-field="s4_t_gB" placeholder="…"></td><td><input data-field="s4_t_agB" placeholder="…"></td><td><input data-field="s4_t_dB" placeholder="…"></td></tr>
+      <tr><td style="text-align:center;font-family:var(--font-m);font-weight:700">AB</td><td><input data-field="s4_t_gAB" placeholder="…"></td><td><input data-field="s4_t_agAB" placeholder="…"></td><td><input data-field="s4_t_dAB" placeholder="…"></td></tr>
+      <tr><td style="text-align:center;font-family:var(--font-m);font-weight:700">O</td><td><input data-field="s4_t_gO" placeholder="…"></td><td><input data-field="s4_t_agO" placeholder="…"></td><td><input data-field="s4_t_dO" placeholder="…"></td></tr>
+    </tbody></table>
+    <div class="q-block sp"><div class="q-label"><span class="qnum" style="background:var(--w4)">→</span><span class="qtext">Caso judicial: el niño tiene grupo O. Madre grupo A, Padre 1 grupo B, Padre 2 grupo AB. ¿Cuál no puede ser el padre?</span></div><textarea class="answer-lines lg" data-field="s4_judicial" placeholder="Analiza la compatibilidad genética y justifica tu respuesta…"></textarea></div>
+    <div class="act-footer">
+      <button class="save-btn" onclick="saveActivity('act6',this)">💾 GUARDAR ACTIVIDADES 6 Y 7</button>
+      <button class="edit-btn" id="editBtn_act6" onclick="editActivity('act6')" style="display:none">✏️ EDITAR</button>
+      <span class="save-confirm" id="saveMsg_act6"></span>
+    </div>
+  </div>
+</div>
+</div>
+</div><!-- /sec-semana4 -->
+
+<!-- ══ SEMANA 5 — SALA DE ESCAPE ══ -->
+<div id="sec-semana5">
+<div class="week-locked-notice" id="lock-semana5"><p>🔒 SEMANA 5 NO DISPONIBLE AÚN — Tu docente activará esta semana próximamente.</p></div>
+<div id="content-semana5">
+<div class="week-header wh5"><div class="num-bg"><span>5</span></div><span class="wlabel">Semana 5</span><h2 class="wtitle" id="semana5">SALA DE ESCAPE:<br>SISTEMA GENCODE</h2><p class="wsubtitle">Resuelve los enigmas genéticos · Descifra la contraseña final</p></div>
+<div class="callout mission" style="margin-bottom:20px">Trabajad en grupos. Cada estación tiene un código secreto. Los códigos formarán la <b>contraseña final del Sistema GENCODE</b>.</div>
+
+<div class="station"><div class="station-badge">🔬 ESTACIÓN 1 — HERENCIA DE LA ANEMIA FALCIFORME</div>
+  <div style="font-style:italic;font-size:13px;border-left:3px solid var(--w5);padding:10px 14px;background:rgba(153,24,40,.05);margin:12px 0">
+    <b>Historia:</b> María siempre supo que tenía anemia falciforme. Cuando conoció a Daniel, ambos soñaron con formar una familia. El primer embarazo trajo a Lucía, quien también padecía anemia falciforme. Lo mismo ocurrió con los tres hijos siguientes: todos habían heredado los genes defectuosos de su madre. El quinto hijo, Tomás, nació sin anemia.
+  </div>
+  <div class="questions" style="margin-top:8px">
+    <div class="q-block"><div class="q-label"><span class="qnum" style="background:var(--w5)">1</span><span class="qtext">Identifica y escribe el genotipo de María y Daniel.</span></div><textarea class="answer-lines sm" data-field="s5_e1_1" placeholder="Genotipo de María: ___ · Genotipo de Daniel: ___"></textarea></div>
+    <div class="q-block"><div class="q-label"><span class="qnum" style="background:var(--w5)">2</span><span class="qtext">Identifica y escribe los genotipos de cada uno de sus hijos (Lucía, hijo 2, hijo 3, hijo 4 y Tomás).</span></div><textarea class="answer-lines" data-field="s5_e1_2" placeholder="Lucía: ___ · Hijos 2-4: ___ · Tomás: ___"></textarea></div>
+    <div class="q-block"><div class="q-label"><span class="qnum" style="background:var(--w5)">3</span><span class="qtext">¿Qué probabilidad de tener hijos con anemia falciforme tendrá Lucía si los tiene con un hombre heterocigota?</span></div>
+      <div class="punnett-wrap"><label>Cuadro de Punnett — Lucía × hombre heterocigota</label>
+        <div class="punnett p2">
+          <div class="cell empty-hdr"></div><div class="cell hdr"><input class="punnett-input" data-field="s5_p1_h1" placeholder="?"></div><div class="cell hdr"><input class="punnett-input" data-field="s5_p1_h2" placeholder="?"></div>
+          <div class="cell hdr"><input class="punnett-input" data-field="s5_p1_v1" placeholder="?"></div><div class="cell ans"><input class="punnett-input" data-field="s5_p1_c1" placeholder="…"></div><div class="cell ans"><input class="punnett-input" data-field="s5_p1_c2" placeholder="…"></div>
+          <div class="cell hdr"><input class="punnett-input" data-field="s5_p1_v2" placeholder="?"></div><div class="cell ans"><input class="punnett-input" data-field="s5_p1_c3" placeholder="…"></div><div class="cell ans"><input class="punnett-input" data-field="s5_p1_c4" placeholder="…"></div>
+        </div>
+      </div>
+      <textarea class="answer-lines sm" data-field="s5_e1_3_concl" placeholder="Probabilidad de hijos con la enfermedad: ___%" style="margin-top:8px"></textarea>
+    </div>
+    <div class="q-block"><div class="q-label"><span class="qnum" style="background:var(--w5)">4</span><span class="qtext">Explica al menos una terapia génica para el tratamiento de la anemia falciforme.</span></div><textarea class="answer-lines" data-field="s5_e1_4" placeholder="Describe el mecanismo de la terapia (BCL11A, terapia con células madre, etc.)…"></textarea></div>
+  </div>
+  <div class="code-field"><span class="code-label">🔑 Código</span><input data-field="s5_code1" placeholder="GA" style="color:#2A7A2A;font-weight:700"><span class="muted">— Código: GA</span></div>
+</div>
+
+<div class="station"><div class="station-badge">🩸 ESTACIÓN 2 — HERENCIA DE GRUPOS SANGUÍNEOS Y FACTOR Rh</div>
+  <div style="font-style:italic;font-size:13px;border-left:3px solid var(--w5);padding:10px 14px;background:rgba(153,24,40,.05);margin:12px 0">
+    <b>Historia:</b> Francisco y Carmen tienen grupo sanguíneo A positivo y O negativo, respectivamente. Su primer hijo nació con grupo O negativo. Pero el segundo bebé fue A positivo. La pareja no estaba segura si su segundo hijo podría tener ese grupo y factor.
+  </div>
+  <div class="questions" style="margin-top:8px">
+    <div class="q-block"><div class="q-label"><span class="qnum" style="background:var(--w5)">1</span><span class="qtext">¿Cuál es el genotipo de Francisco? (recuerda: su madre era grupo O)</span></div><textarea class="answer-lines sm" data-field="s5_e2_1" placeholder="Genotipo de Francisco: ___"></textarea></div>
+    <div class="q-block"><div class="q-label"><span class="qnum" style="background:var(--w5)">2</span><span class="qtext">¿Cuál es el genotipo de Carmen?</span></div><textarea class="answer-lines sm" data-field="s5_e2_2" placeholder="Genotipo de Carmen: ___"></textarea></div>
+    <div class="q-block"><div class="q-label"><span class="qnum" style="background:var(--w5)">3</span><span class="qtext">¿Cuál es el genotipo del primer bebé?</span></div><textarea class="answer-lines sm" data-field="s5_e2_3" placeholder="Genotipo del primer bebé: ___"></textarea></div>
+    <div class="q-block"><div class="q-label"><span class="qnum" style="background:var(--w5)">4</span><span class="qtext">¿Es posible que el segundo hijo sea A positivo? Realiza el cruce genético y justifica.</span></div>
+      <div class="punnett-wrap"><label>Cuadro de Punnett — Francisco × Carmen</label>
+        <div class="punnett p2">
+          <div class="cell empty-hdr"></div><div class="cell hdr"><input class="punnett-input" data-field="s5_p2_h1" placeholder="?"></div><div class="cell hdr"><input class="punnett-input" data-field="s5_p2_h2" placeholder="?"></div>
+          <div class="cell hdr"><input class="punnett-input" data-field="s5_p2_v1" placeholder="?"></div><div class="cell ans"><input class="punnett-input" data-field="s5_p2_c1" placeholder="…"></div><div class="cell ans"><input class="punnett-input" data-field="s5_p2_c2" placeholder="…"></div>
+          <div class="cell hdr"><input class="punnett-input" data-field="s5_p2_v2" placeholder="?"></div><div class="cell ans"><input class="punnett-input" data-field="s5_p2_c3" placeholder="…"></div><div class="cell ans"><input class="punnett-input" data-field="s5_p2_c4" placeholder="…"></div>
+        </div>
+      </div>
+      <textarea class="answer-lines sm" data-field="s5_e2_4_concl" placeholder="¿Es posible? Justifica con el cruce…" style="margin-top:8px"></textarea>
+    </div>
+  </div>
+  <div class="code-field"><span class="code-label">🔑 Código</span><input data-field="s5_code2" placeholder="TTA" style="color:#2A7A2A;font-weight:700"><span class="muted">— Código: TTA</span></div>
+</div>
+
+<div class="station"><div class="station-badge">🧬 ESTACIÓN 3 — CÓDIGO GENÉTICO, TRANSCRIPCIÓN Y TRADUCCIÓN</div>
+  <div style="font-style:italic;font-size:13px;border-left:3px solid var(--w5);padding:10px 14px;background:rgba(153,24,40,.05);margin:12px 0">
+    <b>Misión:</b> Un grupo de investigadores está estudiando una secuencia de ADN misteriosa y quiere averiguar la pequeña cadena de aminoácidos que codifica.<br>
+    <b style="font-family:var(--font-m);font-size:12px;letter-spacing:.08em">TAC — GGA — TTT — ACC — GCG — AAT</b>
+  </div>
+  <div class="questions" style="margin-top:8px">
+    <div class="q-block"><div class="q-label"><span class="qnum" style="background:var(--w5)">1</span><span class="qtext">¿Cuál es la secuencia de ARNm que se forma a partir de este segmento de ADN?</span></div>
+      <table class="data-table"><thead><tr><th style="background:var(--w5)">Codón ADN</th><th style="background:var(--w5)">ARNm</th><th style="background:var(--w5)">Anticodón ARNt</th><th style="background:var(--w5)">Aminoácido</th></tr></thead><tbody>
+        <tr><td style="font-family:var(--font-m)">TAC</td><td><input data-field="s5_e3_m1" placeholder="…"></td><td><input data-field="s5_e3_a1" placeholder="…"></td><td><input data-field="s5_e3_aa1" placeholder="…"></td></tr>
+        <tr><td style="font-family:var(--font-m)">GGA</td><td><input data-field="s5_e3_m2" placeholder="…"></td><td><input data-field="s5_e3_a2" placeholder="…"></td><td><input data-field="s5_e3_aa2" placeholder="…"></td></tr>
+        <tr><td style="font-family:var(--font-m)">TTT</td><td><input data-field="s5_e3_m3" placeholder="…"></td><td><input data-field="s5_e3_a3" placeholder="…"></td><td><input data-field="s5_e3_aa3" placeholder="…"></td></tr>
+        <tr><td style="font-family:var(--font-m)">ACC</td><td><input data-field="s5_e3_m4" placeholder="…"></td><td><input data-field="s5_e3_a4" placeholder="…"></td><td><input data-field="s5_e3_aa4" placeholder="…"></td></tr>
+        <tr><td style="font-family:var(--font-m)">GCG</td><td><input data-field="s5_e3_m5" placeholder="…"></td><td><input data-field="s5_e3_a5" placeholder="…"></td><td><input data-field="s5_e3_aa5" placeholder="…"></td></tr>
+        <tr><td style="font-family:var(--font-m)">AAT</td><td><input data-field="s5_e3_m6" placeholder="…"></td><td><input data-field="s5_e3_a6" placeholder="…"></td><td><input data-field="s5_e3_aa6" placeholder="…"></td></tr>
+      </tbody></table>
+    </div>
+    <div class="q-block"><div class="q-label"><span class="qnum" style="background:var(--w5)">3</span><span class="qtext">¿Qué pasaría si en lugar de TAC la secuencia comenzara con TAT? ¿Cuál sería la secuencia de aminoácidos resultante? ¿Sería viable? ¿Por qué?</span></div><textarea class="answer-lines" data-field="s5_e3_3" placeholder="Analiza la mutación puntual y sus consecuencias…"></textarea></div>
+  </div>
+  <div class="code-field"><span class="code-label">🔑 Código</span><input data-field="s5_code3" placeholder="CA" style="color:#2A7A2A;font-weight:700"><span class="muted">— Código: CA</span></div>
+</div>
+
+<div class="station"><div class="station-badge">🌿 ESTACIÓN 4 — EPIGENÉTICA</div>
+  <div style="font-style:italic;font-size:13px;border-left:3px solid var(--w5);padding:10px 14px;background:rgba(153,24,40,.05);margin:12px 0">
+    <b>Caso:</b> Ángel y Ramona son gemelos idénticos que comparten la misma secuencia de ADN. Ángel crece expuesto al humo del cigarro, corticoides, y comida ultra procesada. Ramona crece con lactancia prolongada, dieta rica en ácido fólico y juego al aire libre. A los 12 años: Ángel tiene mayor adiposidad y perfiles inflamatorios elevados; Ramona tiene metabolismo saludable. El equipo médico sospecha que se están «apagando» y «encendiendo» genes de forma diferente en cada uno.
+  </div>
+  <div class="questions" style="margin-top:8px">
+    <div class="q-block"><div class="q-label"><span class="qnum" style="background:var(--w5)">1</span><span class="qtext">Identifica qué factores del ambiente pueden influir en «apagar» y «prender» genes para cada gemelo.</span></div>
+      <table class="data-table"><thead><tr><th style="background:var(--w5)">Factores de Ángel (negativos)</th><th style="background:var(--w5)">Factores de Ramona (positivos)</th></tr></thead><tbody><tr>
+        <td><textarea data-field="s5_e4_neg" style="min-height:80px;border:none;width:100%;font-family:var(--font-s);font-size:13px;outline:none;resize:none;background:transparent" placeholder="Factores negativos de Ángel…"></textarea></td>
+        <td><textarea data-field="s5_e4_pos" style="min-height:80px;border:none;width:100%;font-family:var(--font-s);font-size:13px;outline:none;resize:none;background:transparent" placeholder="Factores positivos de Ramona…"></textarea></td>
+      </tr></tbody></table>
+    </div>
+    <div class="q-block"><div class="q-label"><span class="qnum" style="background:var(--w5)">2</span><span class="qtext">¿En dónde se pueden colocar las etiquetas o señales químicas para intervenir en la producción de proteínas?</span></div><textarea class="answer-lines sm" data-field="s5_e4_2" placeholder="Menciona el ADN, las histonas y el mecanismo de metilación…"></textarea></div>
+    <div class="q-block"><div class="q-label"><span class="qnum" style="background:var(--w5)">3</span><span class="qtext">¿Los cambios epigenéticos son reversibles? Propón dos cambios de hábitos que podrían favorecer otro epigenoma para Ángel.</span></div><textarea class="answer-lines" data-field="s5_e4_3" placeholder="¿Son reversibles? Dos cambios concretos de hábito para Ángel…"></textarea></div>
+    <div class="q-block"><div class="q-label"><span class="qnum" style="background:var(--w5)">4</span><span class="qtext">¿Por qué este caso no contradice la genética mendeliana?</span></div><textarea class="answer-lines" data-field="s5_e4_4" placeholder="Explica la diferencia entre secuencia de ADN y expresión génica…"></textarea></div>
+  </div>
+  <div class="code-field"><span class="code-label">🔑 Código</span><input data-field="s5_code4" placeholder="EXPERIMENTO GENÉTICO" style="color:#2A7A2A;font-weight:700"><span class="muted">— Código: EXPERIMENTO GENÉTICO</span></div>
+</div>
+
+<div class="final-code">
+  <div class="fc-title">🏆 CONTRASEÑA FINAL DEL SISTEMA GENCODE</div>
+  <div class="fc-codes">
+    <div class="slot"><div class="st">Estación 1</div><input data-field="s5_fc1" placeholder="GA"></div>
+    <div class="slot"><div class="st">Estación 2</div><input data-field="s5_fc2" placeholder="TTA"></div>
+    <div class="slot"><div class="st">Estación 3</div><input data-field="s5_fc3" placeholder="CA"></div>
+    <div class="slot"><div class="st">Estación 4</div><input data-field="s5_fc4" placeholder="EXPERIMENTO GENÉTICO"></div>
+  </div>
+  <div class="fc-password">Contraseña final del sistema:</div>
+  <input class="fc-answer" data-field="s5_password" placeholder="GATTACA EXPERIMENTO GENÉTICO">
+</div>
+<div class="act-footer" style="background:rgba(255,255,255,.05);border-top:1px dashed rgba(255,255,255,.15);padding:16px 0 0">
+  <button class="save-btn" onclick="saveActivity('act8',this)" style="background:var(--w5)">💾 GUARDAR SALA DE ESCAPE</button>
+  <button class="edit-btn" id="editBtn_act8" onclick="editActivity('act8')" style="display:none;border-color:rgba(255,255,255,.3);color:var(--paper)">✏️ EDITAR</button>
+  <span class="save-confirm" id="saveMsg_act8" style="background:rgba(0,0,0,.3);border-color:rgba(255,255,255,.2);color:#7CFF7C"></span>
+</div>
+</div>
+</div><!-- /sec-semana5 -->
+
+<!-- ══ METACOGNICIÓN ══ -->
+<div class="sec-divider" style="margin-top:56px"><span class="sd-icon">🧠</span><h2>Reflexión sobre mi aprendizaje</h2></div>
+<div class="callout info">Al finalizar cada semana tu docente la activa y podrás completar la reflexión correspondiente. ¡Ser honesto/a te ayuda a mejorar!</div>
+<div class="sp" id="metacog-container"></div>
+
+<!-- ══ RÚBRICA ══ -->
+<div id="rubric-section">
+  <div class="week-locked-notice" id="lock-rubric"><p>🔒 AUTOEVALUACIÓN — Disponible cuando tu docente active la Semana 5.</p></div>
+  <div id="content-rubric" style="display:none">
+    <div class="sec-divider"><span class="sd-icon">📊</span><h2>Autoevaluación — Sala de Escape</h2></div>
+    <p style="margin-bottom:14px">Marca con una ✓ tu nivel del 1 al 4 (1 = menor participación, 4 = mayor):</p>
+    <table class="rubric-table"><thead><tr><th>Criterio</th><th>Nivel 1</th><th>Nivel 2</th><th>Nivel 3</th><th>Nivel 4</th></tr></thead><tbody id="rubric-body"></tbody></table>
+    <div style="margin-top:18px;display:flex;gap:10px">
+      <button class="save-btn" onclick="saveRubric()">💾 GUARDAR AUTOEVALUACIÓN</button>
+      <button class="edit-btn" id="editRubricBtn" onclick="editRubric()" style="display:none">✏️ EDITAR</button>
+    </div>
+    <div class="save-confirm" id="rubricSaveMsg"></div>
+  </div>
+</div>
+<div style="height:60px"></div>
+
+</div><!-- /page -->
+`;
+
+function injectStudentApp() {
+  const app = document.getElementById('studentApp');
+  if (!app.hasChildNodes()) {
+    app.innerHTML = STUDENT_TEMPLATE;
+  }
+}
+
+// Default admin credentials
+function initDefaults(){
+  if(!DB.get('admin_creds')) DB.set('admin_creds',{user:'admin',pass:'gencode2024'});
+  if(!DB.get('week_status')) DB.set('week_status',{s1:true,s2:false,s3:false,s4:false,s5:false});
+  if(!DB.get('students')) DB.set('students',[]);
+  if(!DB.get('ai_alerts')) DB.set('ai_alerts',[]);
+  if(!DB.get('ai_config')) DB.set('ai_config',{speed:8,minWords:15});
+}
+initDefaults();
+
+// ═══════════════════════════════════════════════════════════
+//  AUTH
+// ═══════════════════════════════════════════════════════════
+let currentStudent = null;
+let loginMode = 'student';
+
+function setLoginMode(m){
+  loginMode = m;
+  document.querySelectorAll('.login-tab').forEach((t,i)=>t.classList.toggle('active',i===(m==='student'?0:1)));
+  document.getElementById('studentLoginForm').style.display = m==='student'?'':'none';
+  document.getElementById('adminLoginForm').style.display = m==='admin'?'':'none';
+}
+
+function loginAdmin(){
+  const u=document.getElementById('aUser').value.trim();
+  const p=document.getElementById('aPass').value;
+  const creds=DB.get('admin_creds');
+  if(u===creds.user && p===creds.pass){
+    DB.set('session',{type:'admin',ts:Date.now()});
+    showAdmin();
+  } else {
+    document.getElementById('aErr').textContent='Credenciales incorrectas.';
+  }
+}
+
+function loginStudent(){
+  const code=document.getElementById('sCode').value.trim().toUpperCase();
+  const pass=document.getElementById('sPass').value;
+  const students=DB.get('students')||[];
+  const st=students.find(s=>s.code===code && s.pass===pass);
+  if(!st){ document.getElementById('sErr').textContent='Código o contraseña incorrectos.'; return; }
+  currentStudent=st;
+  st.lastSeen=new Date().toLocaleString('es-DO');
+  DB.set('students',students);
+  DB.set('session',{type:'student',code:st.code,ts:Date.now()});
+  showStudent(st);
+}
+
+function logout(){
+  DB.del('session');
+  currentStudent=null;
+  document.body.classList.remove('show-admin','show-student');
+  location.reload();
+}
+
+function checkSession(){
+  const s=DB.get('session');
+  if(!s) return;
+  if(Date.now()-s.ts > 8*60*60*1000){ DB.del('session'); return; }
+  if(s.type==='admin'){ showAdmin(); }
+  else if(s.type==='student'){
+    const students=DB.get('students')||[];
+    const st=students.find(x=>x.code===s.code);
+    if(st){ currentStudent=st; showStudent(st); }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  SHOW VIEWS
+// ═══════════════════════════════════════════════════════════
+function showAdmin(){
+  document.getElementById('loginScreen').style.display='none';
+  document.body.classList.remove('show-student');
+  document.body.classList.add('show-admin');
+  renderAdmin();
+}
+
+function showStudent(st){
+  document.getElementById('loginScreen').style.display='none';
+  document.body.classList.remove('show-admin');
+  document.body.classList.add('show-student');
+  injectStudentApp();
+  document.getElementById('studentTag').textContent=st.code;
+  document.getElementById('sNombre').value=st.name;
+  buildStudentNav();
+  buildHeroPills();
+  buildGlossary();
+  buildMetacog();
+  buildRubric();
+  applyWeekLocks();
+  loadStudentData(st.code);
+  restoreLockedState();
+  initHelixCanvas();
+  initAutoSave(st.code);
+  initAntiAI(st.code);
+  calcProgress(st.code);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  ADMIN RENDER
+// ═══════════════════════════════════════════════════════════
+function renderAdmin(){
+  renderStats();
+  renderDashStudents();
+  renderWeeksControl();
+  renderStudentTable();
+  renderAiAlerts();
+}
+
+function adminTab(t){
+  document.querySelectorAll('.admin-section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('tab-'+t).classList.add('active');
+  document.querySelectorAll('.admin-navbtn').forEach(b=>{
+    b.classList.toggle('active', b.textContent.toLowerCase().includes(
+      t==='dashboard'?'dash':t==='semanas'?'seman':t==='estudiantes'?'estud':t==='alertas'?'anti':t==='config'?'confi':'_'
+    ));
+  });
+}
+
+function renderStats(){
+  const students=DB.get('students')||[];
+  const alerts=DB.get('ai_alerts')||[];
+  const weeks=DB.get('week_status');
+  const weeksOn=Object.values(weeks).filter(Boolean).length;
+  const avgProg=students.length?Math.round(students.reduce((a,s)=>a+(s.progress||0),0)/students.length):0;
+  document.getElementById('statsGrid').innerHTML=`
+    <div class="stat-card"><div class="stat-num">${students.length}</div><div class="stat-label">Estudiantes registrados</div></div>
+    <div class="stat-card"><div class="stat-num">${weeksOn}</div><div class="stat-label">Semanas activas</div></div>
+    <div class="stat-card"><div class="stat-num">${avgProg}%</div><div class="stat-label">Progreso promedio</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:#FF6B6B">${alerts.length}</div><div class="stat-label">Alertas Anti-IA</div></div>
+  `;
+  document.getElementById('aiStatsGrid').innerHTML=`
+    <div class="stat-card"><div class="stat-num" style="color:#FF6B6B">${alerts.length}</div><div class="stat-label">Total alertas</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:#FF6B6B">${alerts.filter(a=>a.level==='ALTA').length}</div><div class="stat-label">Alertas nivel ALTA</div></div>
+    <div class="stat-card"><div class="stat-num">${[...new Set(alerts.map(a=>a.student))].length}</div><div class="stat-label">Estudiantes con alertas</div></div>
+  `;
+}
+
+function renderDashStudents(){
+  const students=DB.get('students')||[];
+  const alerts=DB.get('ai_alerts')||[];
+  const tbody=document.getElementById('dashStudentList');
+  if(!students.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;opacity:.4;font-family:var(--font-m);font-size:11px;padding:20px">No hay estudiantes registrados aún</td></tr>';return;}
+  tbody.innerHTML=students.map(s=>{
+    const aiCount=alerts.filter(a=>a.student===s.code).length;
+    const isOnline=s.lastSeen&&(Date.now()-new Date(s.lastSeen).getTime())<30*60*1000;
+    return `<tr class="${aiCount>2?'aiai-row':''}">
+      <td style="font-weight:600">${s.name}</td>
+      <td><span style="font-family:var(--font-m);font-size:11px;color:var(--gold)">${s.code}</span></td>
+      <td><div class="prog-mini"><div class="prog-mini-fill" style="width:${s.progress||0}%"></div></div> <span style="font-family:var(--font-m);font-size:10px;margin-left:6px">${s.progress||0}%</span></td>
+      <td style="font-family:var(--font-m);font-size:10px;color:rgba(255,255,255,.4)">${s.lastSeen||'—'}</td>
+      <td><span class="badge ${isOnline?'online':'offline'}">${isOnline?'ACTIVO':'INACTIVO'}</span></td>
+      <td><span class="badge ${aiCount>0?'warn':'offline'}">${aiCount} alerta${aiCount!==1?'s':''}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderWeeksControl(){
+  const ws=DB.get('week_status');
+  const names=['Herencia Mendeliana','Síntesis Proteica','Epigenética','Grupos Sanguíneos','Sala de Escape'];
+  const colors=['var(--w1)','var(--w2)','var(--w3)','var(--w4)','var(--w5)'];
+  document.getElementById('weeksControlGrid').innerHTML=[1,2,3,4,5].map(n=>`
+    <div class="week-ctrl">
+      <div class="wc-num" style="color:${colors[n-1]}">${n}</div>
+      <div class="wc-name">${names[n-1]}</div>
+      <button class="toggle-btn ${ws['s'+n]?'on':'off'}" id="wbtn${n}" onclick="toggleWeek(${n})">${ws['s'+n]?'✓ ACTIVA':'✗ BLOQUEADA'}</button>
+    </div>
+  `).join('');
+}
+
+function toggleWeek(n){
+  if(n===1){alert('La Semana 1 siempre debe estar activa.');return;}
+  const ws=DB.get('week_status');
+  ws['s'+n]=!ws['s'+n];
+  DB.set('week_status',ws);
+  renderWeeksControl();
+  renderStats();
+}
+
+function renderStudentTable(){
+  const students=DB.get('students')||[];
+  const alerts=DB.get('ai_alerts')||[];
+  const tbody=document.getElementById('studentTableBody');
+  if(!students.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;opacity:.4;font-family:var(--font-m);font-size:11px;padding:20px">Sin estudiantes registrados</td></tr>';return;}
+  tbody.innerHTML=students.map((s,i)=>{
+    const aiCount=alerts.filter(a=>a.student===s.code).length;
+    return `<tr>
+      <td style="font-weight:600">${s.name}</td>
+      <td style="font-family:var(--font-m);font-size:11px;color:var(--gold)">${s.code}</td>
+      <td style="font-family:var(--font-m);font-size:10px">${s.grade||'—'}</td>
+      <td><div class="prog-mini"><div class="prog-mini-fill" style="width:${s.progress||0}%"></div></div> ${s.progress||0}%</td>
+      <td><span class="badge ${aiCount>0?'warn':'offline'}">${aiCount}</span></td>
+      <td style="font-family:var(--font-m);font-size:10px;color:rgba(255,255,255,.4)">${s.lastSeen||'—'}</td>
+      <td>
+        <button class="action-btn" onclick="resetStudentPass(${i})">Reset pass</button>
+        <button class="action-btn del" onclick="deleteStudent(${i})" style="margin-left:4px">Eliminar</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function renderAiAlerts(){
+  const alerts=DB.get('ai_alerts')||[];
+  const tbody=document.getElementById('aiAlertTable');
+  if(!alerts.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;opacity:.4;font-family:var(--font-m);font-size:11px;padding:20px">Sin alertas registradas</td></tr>';return;}
+  tbody.innerHTML=[...alerts].reverse().map(a=>`<tr>
+    <td style="font-family:var(--font-m);font-size:11px;color:var(--gold)">${a.student}</td>
+    <td style="font-family:var(--font-m);font-size:10px;opacity:.6">${a.field}</td>
+    <td style="font-size:12px">${a.type}</td>
+    <td style="font-family:var(--font-m);font-size:10px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;opacity:.7">${a.fragment}</td>
+    <td style="font-family:var(--font-m);font-size:10px;opacity:.5">${a.ts}</td>
+    <td><span class="badge ${a.level==='ALTA'?'warn':a.level==='MEDIA'?'online':'offline'}">${a.level}</span></td>
+  </tr>`).join('');
+}
+
+function addStudent(){
+  const name=document.getElementById('newName').value.trim();
+  const code=document.getElementById('newCode').value.trim().toUpperCase();
+  const pass=document.getElementById('newPass').value;
+  const grade=document.getElementById('newGrade').value.trim();
+  const msg=document.getElementById('addMsg');
+  if(!name||!code||!pass){msg.className='admin-msg err';msg.textContent='Completa todos los campos obligatorios.';return;}
+  const students=DB.get('students')||[];
+  if(students.find(s=>s.code===code)){msg.className='admin-msg err';msg.textContent='El código ya existe.';return;}
+  students.push({name,code,pass,grade,progress:0,lastSeen:null,data:{}});
+  DB.set('students',students);
+  msg.className='admin-msg ok';msg.textContent='✓ Estudiante registrado correctamente.';
+  document.getElementById('newName').value='';
+  document.getElementById('newCode').value='';
+  document.getElementById('newPass').value='';
+  document.getElementById('newGrade').value='';
+  renderStudentTable();renderStats();renderDashStudents();
+  setTimeout(()=>msg.textContent='',3000);
+}
+
+function deleteStudent(i){
+  if(!confirm('¿Eliminar este estudiante y todos sus datos?')) return;
+  const students=DB.get('students')||[];
+  students.splice(i,1);
+  DB.set('students',students);
+  renderStudentTable();renderStats();renderDashStudents();
+}
+
+function resetStudentPass(i){
+  const np=prompt('Nueva contraseña:');
+  if(!np) return;
+  const students=DB.get('students')||[];
+  students[i].pass=np;
+  DB.set('students',students);
+  renderStudentTable();
+  alert('Contraseña actualizada.');
+}
+
+function changeAdminPass(){
+  const old=document.getElementById('oldAdminPass').value;
+  const n1=document.getElementById('newAdminPass1').value;
+  const n2=document.getElementById('newAdminPass2').value;
+  const msg=document.getElementById('configMsg');
+  const creds=DB.get('admin_creds');
+  if(old!==creds.pass){msg.className='admin-msg err';msg.textContent='Contraseña actual incorrecta.';return;}
+  if(n1!==n2){msg.className='admin-msg err';msg.textContent='Las contraseñas nuevas no coinciden.';return;}
+  if(n1.length<6){msg.className='admin-msg err';msg.textContent='La contraseña debe tener al menos 6 caracteres.';return;}
+  creds.pass=n1;
+  DB.set('admin_creds',creds);
+  msg.className='admin-msg ok';msg.textContent='✓ Contraseña actualizada correctamente.';
+  setTimeout(()=>msg.textContent='',3000);
+}
+
+function saveConfig(){
+  const speed=parseInt(document.getElementById('cfgSpeed').value)||8;
+  const minW=parseInt(document.getElementById('cfgMinWords').value)||15;
+  DB.set('ai_config',{speed,minWords:minW});
+  const msg=document.getElementById('configMsg2');
+  msg.className='admin-msg ok';msg.textContent='✓ Configuración guardada.';
+  setTimeout(()=>msg.textContent='',3000);
+}
+
+function resetAllData(){
+  if(!confirm('⚠ ATENCIÓN: Esto borrará TODOS los estudiantes, respuestas y alertas. Esta acción es irreversible.\n\n¿Estás seguro?')) return;
+  if(prompt('Escribe CONFIRMAR para continuar:')!=='CONFIRMAR') return;
+  const creds=DB.get('admin_creds');
+  try{ if(_lsAvailable) localStorage.clear(); }catch{}
+  Object.keys(_memStore).forEach(k=>delete _memStore[k]);
+  DB.set('admin_creds',creds);
+  initDefaults();
+  renderAdmin();
+  alert('Datos borrados correctamente.');
+}
+
+function exportData(){
+  const data={
+    students:DB.get('students'),
+    weeks:DB.get('week_status'),
+    alerts:DB.get('ai_alerts'),
+    exported:new Date().toLocaleString('es-DO')
+  };
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`gencode_export_${Date.now()}.json`;
+  a.click();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  STUDENT FUNCTIONS
+// ═══════════════════════════════════════════════════════════
+function buildStudentNav(){
+  const ws=DB.get('week_status');
+  const colors=['w1','w2','w3','w4','w5'];
+  document.getElementById('weeksNav').innerHTML=[1,2,3,4,5].map(n=>{
+    const locked=!ws['s'+n];
+    return `<a href="${locked?'#':'#semana'+n}" class="wdot ${colors[n-1]} ${locked?'locked':''}" title="Semana ${n} ${locked?'(bloqueada)':''}">${n}${locked?'<span class="lock-icon">🔒</span>':''}</a>`;
+  }).join('');
+}
+
+function buildHeroPills(){
+  const ws=DB.get('week_status');
+  const names=['HERENCIA MENDELIANA','SÍNTESIS PROTEICA','EPIGENÉTICA','GRUPOS SANGUÍNEOS','SALA DE ESCAPE'];
+  const colors=['var(--w1)','var(--w2)','var(--w3)','var(--w4)','var(--w5)'];
+  document.getElementById('heroPills').innerHTML=[1,2,3,4,5].map(n=>`
+    <a href="${ws['s'+n]?'#semana'+n:'#'}" class="week-pill ${ws['s'+n]?'':'pill-locked'}">
+      <span class="pnum" style="background:${colors[n-1]}">${n}</span>${names[n-1]}${ws['s'+n]?'':' 🔒'}
+    </a>
+  `).join('');
+}
+
+function applyWeekLocks(){
+  const ws=DB.get('week_status');
+  [2,3,4,5].forEach(n=>{
+    const notice=document.getElementById('lock-semana'+n);
+    const content=document.getElementById('content-semana'+n);
+    if(!ws['s'+n]){
+      notice.classList.add('show');
+      if(content) content.style.display='none';
+    } else {
+      notice.classList.remove('show');
+      if(content) content.style.display='';
+    }
+  });
+  // Metacog blocks: unlock when corresponding week is active
+  [1,2,3,4].forEach(n=>{
+    const block=document.getElementById('metacog-block-'+n);
+    if(block){
+      if(ws['s'+n]) block.classList.add('unlocked');
+      else block.classList.remove('unlocked');
+    }
+  });
+  // Rubric: unlock when semana 5 is active
+  const rubricNotice=document.getElementById('lock-rubric');
+  const rubricContent=document.getElementById('content-rubric');
+  if(ws.s5){
+    if(rubricNotice) rubricNotice.classList.add('show');
+    if(rubricContent) rubricContent.style.display='block';
+    // hide the locked notice, show content
+    if(rubricNotice) rubricNotice.style.display='none';
+  } else {
+    if(rubricNotice){ rubricNotice.style.display=''; rubricNotice.classList.add('show'); }
+    if(rubricContent) rubricContent.style.display='none';
+  }
+}
+
+function buildGlossary(){
+  const g=document.getElementById('glossaryGrid');
+  for(let i=1;i<=14;i++){
+    const t=document.createElement('div'); t.className='gc-term';
+    const d=document.createElement('div'); d.className='gc-def';
+    t.innerHTML=`<input data-field="glos_t${i}" placeholder="Término ${i}…">`;
+    d.innerHTML=`<input data-field="glos_d${i}" placeholder="Escribe la definición…">`;
+    g.appendChild(t); g.appendChild(d);
+  }
+}
+
+function buildMetacog(){
+  const weeks=[
+    {label:'Semana 1',color:'var(--w1)',key:'s1'},
+    {label:'Semana 2',color:'var(--w2)',key:'s2'},
+    {label:'Semana 3',color:'var(--w3)',key:'s3'},
+    {label:'Semana 4',color:'var(--w4)',key:'s4'},
+  ];
+  const ws=DB.get('week_status')||{};
+  const mc=document.getElementById('metacog-container');
+  weeks.forEach((w,i)=>{
+    const unlocked=!!ws[w.key];
+    const div=document.createElement('div');
+    div.className='metacog-block'+(unlocked?' unlocked':'');
+    div.id='metacog-block-'+(i+1);
+    div.innerHTML=`
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <span style="width:30px;height:30px;border-radius:50%;background:${w.color};display:flex;align-items:center;justify-content:center;font-family:var(--font-m);font-size:12px;font-weight:700;color:#fff;flex-shrink:0">${i+1}</span>
+        <span style="font-family:var(--font-d);letter-spacing:.06em;font-size:1.15rem">${w.label}</span>
+      </div>
+      <div class="metacog-locked">🔒 &nbsp;Disponible cuando tu docente active la ${w.label}</div>
+      <div class="metacog-content">
+        <div class="metacog-grid">
+          <div class="metacog-card mc-green"><span class="mc-icon">✅</span><span class="mc-label">Lo que comprendí</span><textarea class="answer-lines sm" data-field="mc${i+1}_1" placeholder="Describe con tus propias palabras lo que aprendiste esta semana…"></textarea></div>
+          <div class="metacog-card mc-red"><span class="mc-icon">❓</span><span class="mc-label">Lo que aún me cuesta</span><textarea class="answer-lines sm" data-field="mc${i+1}_2" placeholder="¿Qué conceptos o ejercicios siguen siendo difíciles?"></textarea></div>
+          <div class="metacog-card mc-amber"><span class="mc-icon">💡</span><span class="mc-label">Cómo voy a mejorar</span><textarea class="answer-lines sm" data-field="mc${i+1}_3" placeholder="¿Qué harás diferente? (repasar video, consultar glosario…)"></textarea></div>
+        </div>
+        <div class="act-footer" style="margin-top:12px">
+          <button class="save-btn" onclick="saveMetacog(${i+1},this)" style="background:${w.color}">💾 GUARDAR REFLEXIÓN ${w.label.toUpperCase()}</button>
+          <button class="edit-btn" id="editMetacogBtn_${i+1}" onclick="editMetacog(${i+1})" style="display:none">✏️ EDITAR</button>
+          <span class="save-confirm" id="saveMetacogMsg_${i+1}"></span>
+        </div>
+      </div>`;
+    mc.appendChild(div);
+  });
+}
+
+function buildRubric(){
+  const criteria=['Comprendí los conceptos genéticos de las estaciones','Aporté ideas y colaboré activamente en el grupo','Utilicé procedimientos científicos correctamente','Contribuí a mejorar la cooperación del grupo','Identifico algo que mejoraría en la próxima actividad'];
+  const tbody=document.getElementById('rubric-body');
+  criteria.forEach((c,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${c}</td>${[1,2,3,4].map(n=>`<td class="check-cell"><input type="checkbox" data-field="rub_${i}_${n}"></td>`).join('')}`;
+    tbody.appendChild(tr);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+//  ACTIVITY SAVE / EDIT — per activity button logic
+// ═══════════════════════════════════════════════════════════
+
+// Map each actId to the data-field prefixes it contains
+const ACT_FIELDS = {
+  act1: ['s1_1','s1_2','s1_t1'],
+  act2: ['s1_p','s1_pA','s1_pB','s1_3'],
+  act34: ['s2_'],
+  act5:  ['s3_'],
+  act6:  ['s4_'],
+  act8:  ['s5_'],
+};
+
+function getActFields(actId){
+  const prefixes=ACT_FIELDS[actId]||[];
+  const app=document.getElementById('studentApp');
+  if(!app) return [];
+  return [...app.querySelectorAll('[data-field]')].filter(el=>{
+    const f=el.getAttribute('data-field');
+    return prefixes.some(p=>f.startsWith(p));
+  });
+}
+
+function lockFields(fields, locked){
+  fields.forEach(el=>{
+    if(el.tagName==='TEXTAREA'||el.tagName==='INPUT'){
+      el.readOnly=locked;
+      el.style.background=locked?'#F8F8F6':'';
+      el.style.color=locked?'#888':'';
+      el.style.cursor=locked?'not-allowed':'';
+    }
+  });
+}
+
+function saveActivity(actId, btn){
+  if(!currentStudent) return;
+  saveStudentData(currentStudent.code);
+  const fields=getActFields(actId);
+  lockFields(fields, true);
+  btn.disabled=true;
+  btn.textContent='✅ GUARDADO';
+  const editBtn=document.getElementById('editBtn_'+actId);
+  if(editBtn) editBtn.style.display='inline-flex';
+  const msg=document.getElementById('saveMsg_'+actId);
+  if(msg){
+    msg.textContent='✔ Guardado el '+new Date().toLocaleString('es-DO',{dateStyle:'short',timeStyle:'short'});
+    msg.style.display='inline-block';
+  }
+  // Persist locked state
+  const students=DB.get('students')||[];
+  const idx=students.findIndex(s=>s.code===currentStudent.code);
+  if(idx>=0){
+    if(!students[idx].locked) students[idx].locked={};
+    students[idx].locked[actId]=true;
+    DB.set('students',students);
+  }
+}
+
+function editActivity(actId){
+  const fields=getActFields(actId);
+  lockFields(fields, false);
+  const saveBtn=document.querySelector(`button[onclick="saveActivity('${actId}',this)"]`);
+  if(saveBtn){ saveBtn.disabled=false; saveBtn.textContent='💾 GUARDAR'; }
+  const editBtn=document.getElementById('editBtn_'+actId);
+  if(editBtn) editBtn.style.display='none';
+  const msg=document.getElementById('saveMsg_'+actId);
+  if(msg) msg.style.display='none';
+  // Clear locked state
+  const students=DB.get('students')||[];
+  const idx=students.findIndex(s=>s.code===currentStudent.code);
+  if(idx>=0){
+    if(students[idx].locked) delete students[idx].locked[actId];
+    DB.set('students',students);
+  }
+}
+
+function saveMetacog(n, btn){
+  if(!currentStudent) return;
+  saveStudentData(currentStudent.code);
+  const app=document.getElementById('studentApp');
+  const fields=[...app.querySelectorAll(`[data-field^="mc${n}_"]`)];
+  lockFields(fields, true);
+  btn.disabled=true; btn.textContent='✅ GUARDADA';
+  const editBtn=document.getElementById('editMetacogBtn_'+n);
+  if(editBtn) editBtn.style.display='inline-flex';
+  const msg=document.getElementById('saveMetacogMsg_'+n);
+  if(msg){ msg.textContent='✔ Guardado el '+new Date().toLocaleString('es-DO',{dateStyle:'short',timeStyle:'short'}); msg.style.display='inline-block'; }
+  const students=DB.get('students')||[];
+  const idx=students.findIndex(s=>s.code===currentStudent.code);
+  if(idx>=0){
+    if(!students[idx].locked) students[idx].locked={};
+    students[idx].locked['mc'+n]=true;
+    DB.set('students',students);
+  }
+}
+
+function editMetacog(n){
+  const app=document.getElementById('studentApp');
+  const fields=[...app.querySelectorAll(`[data-field^="mc${n}_"]`)];
+  lockFields(fields, false);
+  const saveBtn=document.querySelector(`button[onclick="saveMetacog(${n},this)"]`);
+  if(saveBtn){ saveBtn.disabled=false; saveBtn.innerHTML=`💾 GUARDAR REFLEXIÓN SEMANA ${n}`; }
+  const editBtn=document.getElementById('editMetacogBtn_'+n);
+  if(editBtn) editBtn.style.display='none';
+  const msg=document.getElementById('saveMetacogMsg_'+n);
+  if(msg) msg.style.display='none';
+  const students=DB.get('students')||[];
+  const idx=students.findIndex(s=>s.code===currentStudent.code);
+  if(idx>=0){
+    if(students[idx].locked) delete students[idx].locked['mc'+n];
+    DB.set('students',students);
+  }
+}
+
+function saveRubric(){
+  if(!currentStudent) return;
+  saveStudentData(currentStudent.code);
+  document.querySelectorAll('.rubric-table input[type="checkbox"]').forEach(cb=>{ cb.disabled=true; });
+  const saveBtn=document.querySelector('button[onclick="saveRubric()"]');
+  if(saveBtn){ saveBtn.disabled=true; saveBtn.textContent='✅ AUTOEVALUACIÓN GUARDADA'; }
+  const editBtn=document.getElementById('editRubricBtn');
+  if(editBtn) editBtn.style.display='inline-flex';
+  const msg=document.getElementById('rubricSaveMsg');
+  if(msg){ msg.textContent='✔ Guardado el '+new Date().toLocaleString('es-DO',{dateStyle:'short',timeStyle:'short'}); msg.style.display='block'; msg.style.marginTop='10px'; }
+  const students=DB.get('students')||[];
+  const idx=students.findIndex(s=>s.code===currentStudent.code);
+  if(idx>=0){
+    if(!students[idx].locked) students[idx].locked={};
+    students[idx].locked['rubric']=true;
+    DB.set('students',students);
+  }
+}
+
+function editRubric(){
+  document.querySelectorAll('.rubric-table input[type="checkbox"]').forEach(cb=>{ cb.disabled=false; });
+  const saveBtn=document.querySelector('button[onclick="saveRubric()"]');
+  if(saveBtn){ saveBtn.disabled=false; saveBtn.textContent='💾 GUARDAR AUTOEVALUACIÓN'; }
+  const editBtn=document.getElementById('editRubricBtn');
+  if(editBtn) editBtn.style.display='none';
+  const msg=document.getElementById('rubricSaveMsg');
+  if(msg) msg.style.display='none';
+  const students=DB.get('students')||[];
+  const idx=students.findIndex(s=>s.code===currentStudent.code);
+  if(idx>=0){
+    if(students[idx].locked) delete students[idx].locked['rubric'];
+    DB.set('students',students);
+  }
+}
+
+function restoreLockedState(){
+  if(!currentStudent) return;
+  const students=DB.get('students')||[];
+  const st=students.find(s=>s.code===currentStudent.code);
+  if(!st||!st.locked) return;
+  Object.keys(st.locked).forEach(actId=>{
+    if(!st.locked[actId]) return;
+    if(actId.startsWith('mc')){
+      const n=parseInt(actId.replace('mc',''));
+      const fields=[...(document.getElementById('studentApp')||document).querySelectorAll(`[data-field^="mc${n}_"]`)];
+      lockFields(fields,true);
+      const btn=document.querySelector(`button[onclick="saveMetacog(${n},this)"]`);
+      if(btn){ btn.disabled=true; btn.textContent='✅ GUARDADA'; }
+      const editBtn=document.getElementById('editMetacogBtn_'+n);
+      if(editBtn) editBtn.style.display='inline-flex';
+    } else if(actId==='rubric'){
+      document.querySelectorAll('.rubric-table input[type="checkbox"]').forEach(cb=>{ cb.disabled=true; });
+      const saveBtn=document.querySelector('button[onclick="saveRubric()"]');
+      if(saveBtn){ saveBtn.disabled=true; saveBtn.textContent='✅ AUTOEVALUACIÓN GUARDADA'; }
+      const editBtn=document.getElementById('editRubricBtn');
+      if(editBtn) editBtn.style.display='inline-flex';
+    } else {
+      const fields=getActFields(actId);
+      lockFields(fields,true);
+      const saveBtn=document.querySelector(`button[onclick="saveActivity('${actId}',this)"]`);
+      if(saveBtn){ saveBtn.disabled=true; saveBtn.textContent='✅ GUARDADO'; }
+      const editBtn=document.getElementById('editBtn_'+actId);
+      if(editBtn) editBtn.style.display='inline-flex';
+    }
+  });
+}
+
+
+let isLoadingData = false;
+
+function loadStudentData(code){
+  const students=DB.get('students')||[];
+  const st=students.find(s=>s.code===code);
+  if(!st||!st.data) return;
+  const app=document.getElementById('studentApp');
+  if(!app) return;
+  isLoadingData = true;
+  app.querySelectorAll('[data-field]').forEach(el=>{
+    const k=el.getAttribute('data-field');
+    if(st.data[k]===undefined) return;
+    if(el.type==='checkbox') el.checked=!!st.data[k];
+    else el.value=st.data[k]||'';
+  });
+  isLoadingData = false;
+}
+
+function saveStudentData(code){
+  const students=DB.get('students')||[];
+  const idx=students.findIndex(s=>s.code===code);
+  if(idx<0) return;
+  if(!students[idx].data) students[idx].data={};
+  const app=document.getElementById('studentApp');
+  if(!app) return;
+  app.querySelectorAll('[data-field]').forEach(el=>{
+    const k=el.getAttribute('data-field');
+    students[idx].data[k]=el.type==='checkbox'?el.checked:el.value;
+  });
+  students[idx].lastSeen=new Date().toLocaleString('es-DO');
+  DB.set('students',students);
+}
+
+function calcProgress(code){
+  const app=document.getElementById('studentApp');
+  if(!app) return;
+  const fields=app.querySelectorAll('[data-field]');
+  let total=0,done=0;
+  fields.forEach(el=>{
+    if(el.type==='checkbox') return;
+    total++;
+    if((el.value||'').trim()!=='') done++;
+  });
+  const pct=total>0?Math.round((done/total)*100):0;
+  const bar=document.getElementById('barraProgreso');
+  if(bar) bar.style.width=pct+'%';
+  const students=DB.get('students')||[];
+  const idx=students.findIndex(s=>s.code===code);
+  if(idx>=0){students[idx].progress=pct;DB.set('students',students);}
+}
+
+let saveTimer=null;
+function initAutoSave(code){
+  const app=document.getElementById('studentApp');
+  if(!app) return;
+  app.querySelectorAll('[data-field]').forEach(el=>{
+    el.addEventListener('input',()=>{
+      clearTimeout(saveTimer);
+      saveTimer=setTimeout(()=>{saveStudentData(code);calcProgress(code);},1500);
+    });
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+//  ANTI-IA SYSTEM
+// ═══════════════════════════════════════════════════════════
+const AI_PHRASES=[
+  'en conclusión','en resumen','como se puede observar','es importante destacar',
+  'cabe mencionar','desde una perspectiva','es fundamental comprender',
+  'en el ámbito de','a modo de conclusión','podemos afirmar que',
+  'en este sentido','en definitiva','como resultado de',
+  'it is worth noting','furthermore','moreover','additionally',
+  'in conclusion','to summarize','it should be noted',
+  'es esencial','vale la pena señalar','a manera de conclusión',
+  'desde un punto de vista científico','resulta evidente que',
+  'se puede concluir','se puede observar que','como bien es sabido',
+];
+
+const fieldTypingData={};
+
+function initAntiAI(code){
+  const cfg=DB.get('ai_config')||{speed:8,minWords:15};
+  const app=document.getElementById('studentApp');
+  if(!app) return;
+
+  app.querySelectorAll('textarea[data-field], input[data-field]').forEach(el=>{
+    const fid=el.getAttribute('data-field');
+    fieldTypingData[fid]={chars:0,startTime:null,prevValue:''};
+
+    // Track paste
+    el.addEventListener('paste',e=>{
+      const pasted=e.clipboardData?.getData('text')||'';
+      if(pasted.trim().split(/\s+/).length>=cfg.minWords){
+        const snippet=pasted.substring(0,80)+'…';
+        registerAlert(code,fid,'Texto pegado (sin escritura previa)',snippet,'ALTA');
+      }
+    });
+
+    // Track speed
+    el.addEventListener('keydown',e=>{
+      const d=fieldTypingData[fid];
+      if(!d.startTime&&el.value.trim()==='') d.startTime=Date.now();
+    });
+
+    el.addEventListener('input',()=>{
+      const d=fieldTypingData[fid];
+      const val=el.value;
+      const words=val.trim().split(/\s+/).filter(Boolean).length;
+      const elapsed=(Date.now()-(d.startTime||Date.now()))/1000;
+
+      // Speed detection
+      if(words>=cfg.minWords && elapsed>0){
+        const wps=words/elapsed;
+        if(wps>cfg.speed && Math.abs(val.length-d.prevValue.length)>50){
+          registerAlert(code,fid,'Velocidad anormal de escritura',val.substring(0,80)+'…','ALTA');
+        }
+      }
+
+      // Phrase detection
+      const valLower=val.toLowerCase();
+      const found=AI_PHRASES.filter(p=>valLower.includes(p));
+      if(found.length>=2){
+        registerAlert(code,fid,`Patrones de IA detectados (${found.slice(0,3).join(', ')})`,val.substring(0,80)+'…','MEDIA');
+      }
+
+      d.prevValue=val;
+    });
+  });
+}
+
+let alertCooldown={};
+function registerAlert(studentCode,field,type,fragment,level){
+  if(isLoadingData) return;
+  const key=`${studentCode}_${field}_${type}`;
+  const now=Date.now();
+  if(alertCooldown[key]&&now-alertCooldown[key]<60000) return;
+  alertCooldown[key]=now;
+
+  const alerts=DB.get('ai_alerts')||[];
+  alerts.push({student:studentCode,field,type,fragment,level,ts:new Date().toLocaleString('es-DO')});
+  DB.set('ai_alerts',alerts);
+
+  // Update student alert count in students DB
+  const students=DB.get('students')||[];
+  DB.set('students',students);
+
+  showAntiIaToast();
+}
+
+function showAntiIaToast(){
+  if(!document.body.classList.contains('show-student')) return;
+  const t=document.getElementById('antiIaToast');
+  if(!t) return;
+  t.style.display='block';
+  setTimeout(()=>{ if(t) t.style.display='none'; },5000);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  DNA HELIX CANVAS
+// ═══════════════════════════════════════════════════════════
+function initHelixCanvas(){
+  const canvas=document.getElementById('helixCanvas');
+  if(!canvas) return;
+  const ctx=canvas.getContext('2d');
+  function resize(){canvas.width=200;canvas.height=canvas.parentElement?.offsetHeight||window.innerHeight;}
+  resize();window.addEventListener('resize',resize);
+  const pal=['#42A5F5','#EF5350','#66BB6A','#FFA726','#AB47BC'];
+  let t=0;
+  function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    const h=canvas.height;const cx=100;
+    for(let y=0;y<h+16;y+=16){
+      const ph=(y/h)*Math.PI*8+t;
+      const x1=cx+Math.sin(ph)*58;const x2=cx+Math.sin(ph+Math.PI)*58;
+      const c1=pal[Math.floor(y/16)%3];const c2=pal[Math.floor(y/16)%3+2];
+      ctx.beginPath();ctx.moveTo(x1,y);ctx.lineTo(x2,y);
+      ctx.strokeStyle='rgba(255,255,255,0.12)';ctx.lineWidth=1;ctx.stroke();
+      ctx.beginPath();ctx.arc(x1,y,4.5,0,Math.PI*2);ctx.fillStyle=c1;ctx.fill();
+      ctx.beginPath();ctx.arc(x2,y,4.5,0,Math.PI*2);ctx.fillStyle=c2;ctx.fill();
+    }
+    t+=0.01;requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════
+// Prevent right-click on student app (minor deterrent)
+document.addEventListener('contextmenu',e=>{
+  if(document.body.classList.contains('show-student')) e.preventDefault();
+});
+
+// Handle enter key in login
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){
+    const ls=document.getElementById('loginScreen');
+    if(ls.style.display!=='none'){
+      if(loginMode==='student') loginStudent();
+      else loginAdmin();
+    }
+  }
+});
+
+checkSession();
+
+// Aviso si localStorage no está disponible (modo privado iOS)
+if(!_lsAvailable){
+  const warn=document.createElement('div');
+  warn.style.cssText='position:fixed;bottom:0;left:0;right:0;background:#B84A0C;color:#fff;font-family:monospace;font-size:11px;padding:8px 14px;z-index:99999;text-align:center';
+  warn.textContent='⚠ Modo privado detectado: los datos se guardan solo en esta sesión. Abre en modo normal para guardar permanentemente.';
+  document.body.appendChild(warn);
+  setTimeout(()=>warn.remove(), 8000);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  PWA — Registrar Service Worker
+// ═══════════════════════════════════════════════════════════
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg=>console.log('[GENCODE] SW registrado:', reg.scope))
+      .catch(err=>console.warn('[GENCODE] SW error:', err));
+  });
+}
+
+// Botón "Instalar app" para Android Chrome
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt', e=>{
+  e.preventDefault();
+  deferredPrompt=e;
+  // Mostrar botón de instalación si existe
+  const btn=document.getElementById('installAppBtn');
+  if(btn) btn.style.display='inline-flex';
+});
+window.addEventListener('appinstalled', ()=>{
+  deferredPrompt=null;
+  const btn=document.getElementById('installAppBtn');
+  if(btn) btn.style.display='none';
+});
+
+function installApp(){
+  if(!deferredPrompt) return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(()=>{ deferredPrompt=null; });
+}
+
+// Safety net: if after 100ms no view is active, show loginScreen
+setTimeout(()=>{
+  if(!document.body.classList.contains('show-admin') && !document.body.classList.contains('show-student')){
+    document.getElementById('loginScreen').style.display='flex';
+  }
+}, 100);
+</script>
+</body>
+</html>
