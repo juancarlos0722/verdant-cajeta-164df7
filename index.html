@@ -2209,5 +2209,228 @@ setTimeout(()=>{
   }
 }, 100);
 </script>
+// ═══════════════════════════════════════════════════════
+// GENCODE — CONECTOR COMPLETO A GOOGLE SHEETS DATABASE
+// Archivo único para usar en la plataforma educativa
+// ═══════════════════════════════════════════════════════
+
+const GENCODE_API = {
+
+  // URL del Apps Script
+  url: "https://script.google.com/macros/s/AKfycbyVuZeTYYjbImCj-r_yAOFHzaKACOUZH-aulwVP2upUBnymwfFs87sdZPTQ3rheE3eo/exec",
+
+  // ─────────────────────────────────────
+  // FUNCIÓN BASE DE CONEXIÓN
+  // ─────────────────────────────────────
+  async call(action, data = {}) {
+
+    try {
+
+      const response = await fetch(this.url, {
+        method: "POST",
+        body: JSON.stringify({
+          action: action,
+          ...data
+        })
+      });
+
+      return await response.json();
+
+    } catch (error) {
+
+      console.error("GENCODE API ERROR:", error);
+
+      return {
+        success: false,
+        error: error.message
+      };
+
+    }
+
+  },
+
+  // ─────────────────────────────────────
+  // CONFIGURACIÓN DEL SISTEMA
+  // ─────────────────────────────────────
+  async getConfig() {
+
+    return await this.call("getConfig");
+
+  },
+
+  // ─────────────────────────────────────
+  // REGISTRAR ESTUDIANTE
+  // ─────────────────────────────────────
+  async registerStudent(nombre, codigo, password, grado) {
+
+    return await this.call("registerStudent", {
+      nombre: nombre,
+      codigo: codigo,
+      password: password,
+      grado: grado
+    });
+
+  },
+
+  // ─────────────────────────────────────
+  // OBTENER TODOS LOS ESTUDIANTES
+  // ─────────────────────────────────────
+  async getStudents() {
+
+    return await this.call("getStudents");
+
+  },
+
+  // ─────────────────────────────────────
+  // REGISTRO DE SESIÓN (LOGIN / LOGOUT)
+  // ─────────────────────────────────────
+  async logSession(estudianteId, codigo, accion) {
+
+    return await this.call("logSession", {
+      estudianteId: estudianteId,
+      codigo: codigo,
+      accion: accion
+    });
+
+  },
+
+  // ─────────────────────────────────────
+  // GUARDAR RESPUESTA DEL ESTUDIANTE
+  // ─────────────────────────────────────
+  async saveResponse(
+    estudianteId,
+    codigo,
+    nombre,
+    semana,
+    actividad,
+    campo,
+    respuesta,
+    palabras
+  ) {
+
+    return await this.call("saveResponse", {
+
+      estudianteId: estudianteId,
+      estudianteCodigo: codigo,
+      estudianteNombre: nombre,
+      semana: semana,
+      actividad: actividad,
+      campo: campo,
+      respuesta: respuesta,
+      palabras: palabras
+
+    });
+
+  },
+
+  // ─────────────────────────────────────
+  // GUARDAR ALERTA DE POSIBLE IA
+  // ─────────────────────────────────────
+  async saveAIAlert(
+    estudianteId,
+    codigo,
+    nombre,
+    campo,
+    tipoAlerta,
+    fragmento,
+    nivel,
+    semana
+  ) {
+
+    return await this.call("saveAIAlert", {
+
+      estudianteId: estudianteId,
+      estudianteCodigo: codigo,
+      estudianteNombre: nombre,
+      campo: campo,
+      tipoAlerta: tipoAlerta,
+      fragmento: fragmento,
+      nivel: nivel,
+      semana: semana
+
+    });
+
+  },
+
+  // ─────────────────────────────────────
+  // EXPORTAR TODOS LOS DATOS
+  // ─────────────────────────────────────
+  async exportData() {
+
+    return await this.call("exportData");
+
+  }
+
+};
+
+
+// ═══════════════════════════════════════════════════════
+// EJEMPLOS DE USO DENTRO DE LA PLATAFORMA
+// ═══════════════════════════════════════════════════════
+
+
+// Registrar estudiante
+/*
+await GENCODE_API.registerStudent(
+  "Ana García",
+  "EST001",
+  "1234",
+  "4to A"
+);
+*/
+
+
+// Obtener estudiantes
+/*
+const estudiantes = await GENCODE_API.getStudents();
+console.log(estudiantes);
+*/
+
+
+// Registrar login
+/*
+await GENCODE_API.logSession(
+  estudianteId,
+  codigo,
+  "login"
+);
+*/
+
+
+// Guardar respuesta
+/*
+await GENCODE_API.saveResponse(
+  id,
+  codigo,
+  nombre,
+  "Semana1",
+  "Actividad1",
+  "campo_texto",
+  textoEscrito,
+  numPalabras
+);
+*/
+
+
+// Detectar posible IA
+/*
+await GENCODE_API.saveAIAlert(
+  id,
+  codigo,
+  nombre,
+  "campo_texto",
+  "PEGADO",
+  fragmentoTexto,
+  "alto",
+  "Semana1"
+);
+*/
+
+
+// Exportar datos
+/*
+const datos = await GENCODE_API.exportData();
+console.log(datos);
+*/
 </body>
 </html>
